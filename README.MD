@@ -87,7 +87,7 @@ cd backend
 npm install
 cp .env.example .env
 # Update .env with your local database credentials
-npm run dev
+npm run dev  # Uses nodemon for auto-restart
 ```
 
 ### Frontend Setup
@@ -122,7 +122,3 @@ ClubHub/
 1. Create a feature branch
 2. Make your changes
 3. Submit a pull request
-
-## License
-
-MIT
