@@ -35,7 +35,6 @@ export default function Register() {
   async function onSubmit(e) {
     e.preventDefault();
 
-    // Mark all fields touched so all validation messages show if invalid
     setTouched({ name: true, email: true, password: true, confirmPassword: true });
 
     const currentErrors = validate(form);
@@ -45,7 +44,6 @@ export default function Register() {
       setSubmitting(true);
       setServerError("");
 
-      // ✅ Call registration API
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -59,7 +57,6 @@ export default function Register() {
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        // Common patterns: { message: "..." } or { errors: [...] }
         const msg =
           data?.message ||
           (Array.isArray(data?.errors) ? data.errors.join(", ") : null) ||
@@ -68,7 +65,7 @@ export default function Register() {
         return;
       }
 
-      // ✅ Redirect to login on success
+    
       navigate("/login", { replace: true, state: { registeredEmail: form.email } });
     } catch (err) {
       setServerError("Network error. Please try again.");
