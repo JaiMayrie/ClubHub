@@ -20,3 +20,11 @@ build/Release
 # IDE/Tools
 .vscode-test
 .eslintcache
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# OS
+.DS_Store
+Thumbs.db
