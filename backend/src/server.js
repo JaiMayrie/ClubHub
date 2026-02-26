@@ -9,6 +9,8 @@ require('dotenv').config();
  * and starts the backend server.
  */
 
+const authRoutes = require('./routes/auth');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
