@@ -80,15 +80,96 @@ docker exec -it clubhub-db psql -U postgres -d clubhub
 
 ## Local Development (without Docker)
 
-### Backend Setup
+===============================================
+
+## Backend Setup (Local Development)
+
+### 1️⃣ Navigate to backend
 
 ```bash
 cd backend
+
+### 2️⃣ Install dependencies
+
 npm install
+
+### 3️⃣ Setup environment variables
+
 cp .env.example .env
-# Update .env with your local database credentials
-npm run dev  # Uses nodemon for auto-restart
-```
+
+Update .env with your local database credentials and JWT secret.
+
+Example:
+
+PORT=5000
+DATABASE_URL=your_postgres_connection_string
+JWT_SECRET=your_secret_key
+
+### 4️⃣ Start backend in development mode
+
+npm run dev
+
+Server runs at:
+
+http://localhost:5000
+
+## 🧪 Running Backend Tests (Jest + Supertest)
+
+We use Jest and Supertest for API testing.
+
+Run all tests:
+npm test
+
+Tests cover:
+1. User Registration
+2. Input validation
+3. Login
+4. Error handling
+
+Jest automatically prevents the server from starting during tests.
+
+## 📮 Testing with Postman
+
+You can manually test the API using Postman.
+
+🔹 Health Check
+GET http://localhost:5000/api/health
+
+🔹 Register User
+POST http://localhost:5000/api/auth/register
+
+Body (JSON):
+
+{
+  "name": "Test User",
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+🔹 Login User
+POST http://localhost:5000/api/auth/login
+
+Body (JSON):
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+## 📂 Backend Structure
+
+backend/
+├── src/
+│   ├── server.js
+│   ├── routes/
+│   │   └── auth.js
+│   └── ...
+├── tests/
+│   └── auth.test.js
+├── jest.config.js
+└── package.json
+
+===============================================
 
 ### Frontend Setup
 
