@@ -1,0 +1,8 @@
+{
+  "jest.rootPath": "backend",
+  "jest.jestCommandLine": "npm test --",
+  "jest.runMode": {
+    "type": "on-save",
+    "testFileOnly": true
+  }
+}
