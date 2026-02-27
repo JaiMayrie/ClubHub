@@ -6,7 +6,7 @@
 
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const db = require("../config/db");
+const db = require("../db");
 
 // Generates a JWT token containing userId and role
 // Token expires in 7 days
