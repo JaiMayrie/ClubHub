@@ -3,6 +3,7 @@ services:
   db:
     image: postgres:16-alpine
     container_name: clubhub-db
+    restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -11,11 +12,25 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./backend/src/database:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - clubhub-network
+
+  # pgAdmin
+  pgadmin:
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: postgres
+    ports:
+      - "5050:80"
     networks:
       - clubhub-network
 
@@ -27,14 +42,10 @@ services:
     container_name: clubhub-backend
     ports:
       - "5000:5000"
+    env_file:
+      - ./backend/.env
     environment:
-      NODE_ENV: development
       DB_HOST: db
-      DB_PORT: 5432
-      DB_NAME: clubhub
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      PORT: 5000
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -53,8 +64,8 @@ services:
     container_name: clubhub-frontend
     ports:
       - "5173:5173"
-    environment:
-      - VITE_API_URL=http://localhost:5000
+    env_file:
+      - ./frontend/.env
     volumes:
       - ./frontend:/app
       - /app/node_modules
