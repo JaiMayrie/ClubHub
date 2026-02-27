@@ -16,6 +16,13 @@ const pool = new Pool({
 });
 
 pool.on("error", (err) => {
+  if (
+    process.env.NODE_ENV === "test" &&
+    err?.message?.includes("Connection terminated unexpectedly")
+  ) {
+    return;
+  }
+
   console.error("Unexpected PostgreSQL pool error:", err);
 });
 
