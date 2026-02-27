@@ -130,3 +130,22 @@ exports.login = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
+// ================= CURRENT USER =================
+exports.getMe = async (req, res) => {
+  try {
+    const result = await db.query(
+      "SELECT id, name, email, role FROM users WHERE id = $1",
+      [req.userId],
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    return res.json({ user: result.rows[0] });
+  } catch (error) {
+    console.error("Get current user error:", error);
+    return res.status(500).json({ error: "Server error" });
+  }
+};

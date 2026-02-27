@@ -14,7 +14,10 @@ describe("Auth Endpoints", () => {
       password: "password123",
     });
 
-    return registerRes.body.token;
+    return {
+      token: registerRes.body.token,
+      user: registerRes.body.user,
+    };
   };
 
   test("Register new user - success", async () => {
@@ -158,19 +161,24 @@ describe("Auth Endpoints", () => {
   });
 
   test("JWT token grants access to protected route", async () => {
-    const token = await registerAndGetToken();
+    const { token, user } = await registerAndGetToken();
 
     const res = await request(app)
-      .get("/api/auth/test")
+      .get("/api/auth/me")
       .set("Authorization", `Bearer ${token}`);
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toHaveProperty("message", "Protected route works!");
-    expect(res.body).toHaveProperty("userId");
+    expect(res.body).toHaveProperty("user");
+    expect(res.body.user).toMatchObject({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    });
   });
 
   test("Protected route fails without JWT token", async () => {
-    const res = await request(app).get("/api/auth/test");
+    const res = await request(app).get("/api/auth/me");
 
     expect(res.statusCode).toBe(401);
     expect(res.body).toHaveProperty("error", "No token provided");
@@ -178,7 +186,7 @@ describe("Auth Endpoints", () => {
 
   test("Protected route fails with invalid JWT token", async () => {
     const res = await request(app)
-      .get("/api/auth/test")
+      .get("/api/auth/me")
       .set("Authorization", "Bearer invalid.token.value");
 
     expect(res.statusCode).toBe(401);
@@ -196,7 +204,7 @@ describe("Auth Endpoints", () => {
     );
 
     const res = await request(app)
-      .get("/api/auth/test")
+      .get("/api/auth/me")
       .set("Authorization", `Bearer ${expiredToken}`);
 
     expect(res.statusCode).toBe(401);
