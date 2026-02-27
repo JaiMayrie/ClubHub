@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "test": "jest --runInBand --detectOpenHandles"
+    "test": "cross-env NODE_ENV=test JWT_SECRET=test_jwt_secret DB_HOST=127.0.0.1 DB_PORT=55432 DB_NAME=clubhub_test DB_USER=postgres DB_PASSWORD=postgres jest --runInBand --detectOpenHandles"
   },
   "keywords": [],
   "author": "",
@@ -20,9 +20,10 @@
     "pg": "^8.18.0"
   },
   "devDependencies": {
-    "@shelf/jest-postgres": "^1.2.3",
+    "cross-env": "^10.1.0",
     "jest": "^30.2.0",
     "nodemon": "^3.1.14",
-    "supertest": "^7.2.2"
+    "supertest": "^7.2.2",
+    "testcontainers": "^11.12.0"
   }
 }
