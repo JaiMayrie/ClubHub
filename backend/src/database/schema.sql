@@ -14,7 +14,7 @@ DROP TABLE IF EXISTS users;
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
-  email VARCHAR(255) NOT NULL UNIQUE,
+  email VARCHAR(255) NOT NULL UNIQUE CHECK (email = LOWER(email)),
   password_hash VARCHAR(255) NOT NULL,
   role VARCHAR(20) DEFAULT 'student' CHECK (role IN ('student', 'admin')),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
