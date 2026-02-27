@@ -6,10 +6,10 @@
 -- ============================================
 -- Note: Password hashes are examples only. Use bcrypt to generate real hashes
 INSERT INTO users (name, email, password_hash, role) VALUES
-('Alice Johnson', 'alice@purdue.edu', '$2b$10$examplehash1', 'admin'),
-('Bob Smith', 'bob@purdue.edu', '$2b$10$examplehash2', 'student'),
-('Carol White', 'carol@purdue.edu', '$2b$10$examplehash3', 'student'),
-('David Lee', 'david@purdue.edu', '$2b$10$examplehash4', 'admin');
+('Alice Johnson', 'alice@purdue.edu', '$2b$10$N9qo8uLOickgx2ZMRZo5i.Ul1j7rwhhtjfiPgk41IrT9jp/1hhZCm', 'admin'),
+('Bob Smith', 'bob@purdue.edu', '$2b$10$wAic8Jgk4l9q63h0tJfSeO3y1Uu3rYQpU5BzS2kGvM3tQp6JrVD9a', 'student'),
+('Carol White', 'carol@purdue.edu', '$2b$10$3hH2v5l8Qq9WcA1b2C3DeOQnJkLmNoPqRsTuVwXyZaBcDeFgHiJ2m', 'student'),
+('David Lee', 'david@purdue.edu', '$2b$10$7kL9mNoPqRsTuVwXyZaBcOeR1t2u3v4w5x6y7z8AaBbCcDdEeFfGm', 'admin');
 
 -- ============================================
 -- INSERT TEST CLUBS
