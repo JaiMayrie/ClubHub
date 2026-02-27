@@ -2,7 +2,7 @@
   "jest.rootPath": "backend",
   "jest.jestCommandLine": "npm test --",
   "jest.runMode": {
-    "type": "on-save",
+    "type": "on-demand",
     "testFileOnly": true
   }
 }
