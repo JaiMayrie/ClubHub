@@ -2,7 +2,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const { execSync } = require("child_process");
-const db = require("../src/config/db");
+const db = require("../src/db");
 
 const STATE_FILE = path.join(os.tmpdir(), "clubhub-testcontainers-state.json");
 
