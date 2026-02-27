@@ -46,6 +46,7 @@ describe("Auth Endpoints", () => {
     });
 
     expect(res.statusCode).toBe(409);
+    expect(res.body).toHaveProperty("error", "Email already registered");
   });
 
   test("Register fails if fields missing", async () => {
@@ -54,6 +55,7 @@ describe("Auth Endpoints", () => {
       .send({ email: "test@test.com" });
 
     expect(res.statusCode).toBe(400);
+    expect(res.body).toHaveProperty("error", "All fields required");
   });
 
   test("Register fails with invalid email", async () => {
@@ -64,6 +66,7 @@ describe("Auth Endpoints", () => {
     });
 
     expect(res.statusCode).toBe(400);
+    expect(res.body).toHaveProperty("error", "Invalid email format");
   });
 
   test("Register fails with short password", async () => {
@@ -74,6 +77,10 @@ describe("Auth Endpoints", () => {
     });
 
     expect(res.statusCode).toBe(400);
+    expect(res.body).toHaveProperty(
+      "error",
+      "Password must be at least 6 characters",
+    );
   });
 
   test("Login success", async () => {
@@ -119,6 +126,7 @@ describe("Auth Endpoints", () => {
     });
 
     expect(res.statusCode).toBe(400);
+    expect(res.body).toHaveProperty("error", "Email and password required");
   });
 
   test("Login fails with wrong password", async () => {
@@ -136,6 +144,7 @@ describe("Auth Endpoints", () => {
     });
 
     expect(res.statusCode).toBe(401);
+    expect(res.body).toHaveProperty("error", "Invalid email or password");
   });
 
   test("Login fails for unknown email", async () => {
@@ -145,6 +154,7 @@ describe("Auth Endpoints", () => {
     });
 
     expect(res.statusCode).toBe(401);
+    expect(res.body).toHaveProperty("error", "Invalid email or password");
   });
 
   test("JWT token grants access to protected route", async () => {
