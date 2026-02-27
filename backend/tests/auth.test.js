@@ -1,9 +1,21 @@
 const request = require("supertest");
+const jwt = require("jsonwebtoken");
 const app = require("../src/server");
 
 describe("Auth Endpoints", () => {
   const uniqueEmail = () =>
     `test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@test.com`;
+
+  const registerAndGetToken = async () => {
+    const email = uniqueEmail();
+    const registerRes = await request(app).post("/api/auth/register").send({
+      name: "Token User",
+      email,
+      password: "password123",
+    });
+
+    return registerRes.body.token;
+  };
 
   test("Register new user - success", async () => {
     const email = uniqueEmail();
@@ -133,5 +145,51 @@ describe("Auth Endpoints", () => {
     });
 
     expect(res.statusCode).toBe(401);
+  });
+
+  test("JWT token grants access to protected route", async () => {
+    const token = await registerAndGetToken();
+
+    const res = await request(app)
+      .get("/api/auth/test")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty("message", "Protected route works!");
+    expect(res.body).toHaveProperty("userId");
+  });
+
+  test("Protected route fails without JWT token", async () => {
+    const res = await request(app).get("/api/auth/test");
+
+    expect(res.statusCode).toBe(401);
+    expect(res.body).toHaveProperty("error", "No token provided");
+  });
+
+  test("Protected route fails with invalid JWT token", async () => {
+    const res = await request(app)
+      .get("/api/auth/test")
+      .set("Authorization", "Bearer invalid.token.value");
+
+    expect(res.statusCode).toBe(401);
+    expect(res.body).toHaveProperty("error", "Invalid token");
+  });
+
+  test("Protected route fails with expired JWT token", async () => {
+    const expiredToken = jwt.sign(
+      {
+        userId: 999,
+        role: "student",
+        exp: Math.floor(Date.now() / 1000) - 10, // Set expiration in the past
+      },
+      process.env.JWT_SECRET,
+    );
+
+    const res = await request(app)
+      .get("/api/auth/test")
+      .set("Authorization", `Bearer ${expiredToken}`);
+
+    expect(res.statusCode).toBe(401);
+    expect(res.body).toHaveProperty("error", "Token expired");
   });
 });
