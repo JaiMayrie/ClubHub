@@ -1,4 +1,4 @@
-const { Pool } = require('pg');
+const { Pool } = require("pg");
 
 /**
  * Database Configuration
@@ -8,9 +8,25 @@ const { Pool } = require('pg');
  */
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL, // Stored securely in env
+  host: process.env.DB_HOST || "localhost",
+  port: Number(process.env.DB_PORT) || 5432,
+  database: process.env.DB_NAME || "clubhub",
+  user: process.env.DB_USER || "postgres",
+  password: process.env.DB_PASSWORD || "postgres",
+});
+
+pool.on("error", (err) => {
+  if (
+    process.env.NODE_ENV === "test" &&
+    err?.message?.includes("Connection terminated unexpectedly")
+  ) {
+    return;
+  }
+
+  console.error("Unexpected PostgreSQL pool error:", err);
 });
 
 module.exports = {
   query: (text, params) => pool.query(text, params),
+  pool,
 };

@@ -1,3 +1,6 @@
 module.exports = {
-  testEnvironment: 'node'
+  projects: [
+    "<rootDir>/jest.unit.config.js",
+    "<rootDir>/jest.integration.config.js",
+  ],
 };
