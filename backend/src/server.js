@@ -36,6 +36,10 @@ app.get("/api", (req, res) => {
   res.json({ message: "Welcome to ClubHub API" });
 });
 
+app.get("/", (req, res) => {
+  res.send("Backend is running 🚀");
+});
+
 // Auth routes
 app.use('/api/auth', authRoutes);
 
