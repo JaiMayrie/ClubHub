@@ -148,3 +148,22 @@ exports.getClubById = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch club' });
   }
 };
+
+exports.createClub = async (req, res) => {
+  try {
+    const { name, category, description, meeting_info, contact_email } = req.body;
+    
+    // Validate required fields
+    if (!name || !category || !description) {
+      return res.status(400).json({ 
+        error: 'Name, category, and description are required' 
+      });
+    }
+    
+    res.json({ message: 'Validation passed' });
+    
+  } catch (error) {
+    console.error('Error creating club:', error);
+    res.status(500).json({ error: 'Failed to create club' });
+  }
+};
