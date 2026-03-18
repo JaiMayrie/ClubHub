@@ -9,8 +9,6 @@ require('dotenv').config();
  * and starts the backend server.
  */
 
-const authRoutes = require('./routes/auth');
-
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -40,8 +38,15 @@ app.get("/", (req, res) => {
   res.send("Backend is running 🚀");
 });
 
+// IMPORT ROUTES AFTER APP IS CREATED
+const authRoutes = require('./routes/auth');
+const clubRoutes = require('./routes/clubs');
+
 // Auth routes
 app.use('/api/auth', authRoutes);
+
+// Club routes
+app.use('/api/clubs', clubRoutes);
 
 // Prevent Jest from auto-starting server
 if (process.env.NODE_ENV !== 'test') {
