@@ -30,26 +30,60 @@ const db = require('../db');
  */
 exports.getAllClubs = async (req, res) => {
   try {
-    // Query all clubs with admin information using LEFT JOIN
-    // This ensures we get clubs even if admin info is missing
-    const result = await db.query(`
-      SELECT  
+    // Extract and sanitize query parameters
+    const { category, search } = req.query;
+    const sanitizedCategory = category?.trim();
+    const sanitizedSearch = search?.trim();
+    
+    // Build dynamic SQL query
+    let query = `
+      SELECT 
         clubs.id, 
         clubs.name, 
         clubs.category, 
         clubs.description, 
         clubs.member_count,
+        clubs.created_at,
         users.name as admin_name
       FROM clubs
       LEFT JOIN users ON clubs.admin_id = users.id
-      ORDER BY clubs.name
-    `);
+    `;
     
-    // Handle empty database case
+    const values = [];
+    const conditions = [];
+    let paramCount = 1;
+    
+    // Add category filter if provided
+    if (sanitizedCategory) {
+      conditions.push(`clubs.category = $${paramCount}`);
+      values.push(sanitizedCategory);
+      paramCount++;
+    }
+    
+    // Add search filter if provided (searches both name and description)
+    if (sanitizedSearch) {
+      conditions.push(`(clubs.name ILIKE $${paramCount} OR clubs.description ILIKE $${paramCount})`);
+      values.push(`%${sanitizedSearch}%`);
+      paramCount++;
+    }
+    
+    // Apply WHERE clause if any conditions exist
+    if (conditions.length > 0) {
+      query += ' WHERE ' + conditions.join(' AND ');
+    }
+    
+    // Always order by name
+    query += ' ORDER BY clubs.name ASC';
+    
+    // Execute query
+    const result = await db.query(query, values);
+    
+    // Handle empty results
     if (result.rows.length === 0) {
       return res.json({ 
         clubs: [], 
-        message: 'No clubs found' 
+        count: 0,
+        message: 'No clubs found matching your criteria' 
       });
     }
     
