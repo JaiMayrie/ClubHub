@@ -244,4 +244,6 @@ exports.createClub = async (req, res) => {
     res.status(500).json({ 
       error: 'Failed to create club',
       message: 'An error occurred while creating the club'
-    })
+    });
+  }
+};
