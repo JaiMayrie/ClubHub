@@ -247,3 +247,36 @@ exports.createClub = async (req, res) => {
     });
   }
 };
+
+/**
+ * Get clubs managed by current user
+ * 
+ * @route   GET /api/clubs/my-clubs
+ * @access  Private (requires authentication)
+ * @returns {Array} clubs - List of clubs where user is admin
+ * 
+ * @example
+ * GET /api/clubs/my-clubs
+ * Headers: { Authorization: "Bearer <token>" }
+ */
+exports.getMyClubs = async (req, res) => {
+  try {
+    const result = await db.query(
+      `SELECT 
+        id, name, category, description, member_count, created_at, updated_at
+       FROM clubs
+       WHERE admin_id = $1
+       ORDER BY created_at DESC`,
+      [req.userId]  // req.userId comes from authenticate middleware
+    );
+    
+    res.json({ 
+      clubs: result.rows,
+      count: result.rows.length
+    });
+    
+  } catch (error) {
+    console.error('Error fetching user clubs:', error);
+    res.status(500).json({ error: 'Failed to fetch clubs' });
+  }
+};

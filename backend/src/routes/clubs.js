@@ -3,10 +3,16 @@ const router = express.Router();
 const clubController = require('../controllers/clubController');
 const { authenticate } = require('../middleware/authMiddleware');
 
-// GET all clubs
+// Public routes
 router.get('/', clubController.getAllClubs);
+
+// Protected specific routes (BEFORE :id)
+router.get('/my-clubs', authenticate, clubController.getMyClubs);
+
+// Dynamic route (AFTER specific routes)
 router.get('/:id', clubController.getClubById);
 
+// Admin-only route (create club)
 router.post('/', authenticate, clubController.createClub);
 
 module.exports = router;
