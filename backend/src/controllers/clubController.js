@@ -103,24 +103,44 @@ exports.getAllClubs = async (req, res) => {
   }
 };
 
+/**
+ * Get club by ID with detailed information
+ * 
+ * @route   GET /api/clubs/:id
+ * @access  Public
+ * @param   {number} id - Club ID from URL parameter
+ * @returns {Object} club - Detailed club information including admin details
+ * 
+ * @example
+ * GET /api/clubs/1
+ */
 exports.getClubById = async (req, res) => {
   try {
+    // Extract club ID from URL parameters
     const { id } = req.params;
     
-    const result = await db.query(`
-        SELECT 
-            clubs.*,
-            users.name as admin_name,
-            users.email as admin_email
-        FROM clubs
-        LEFT JOIN users ON clubs.admin_id = users.id
-        WHERE clubs.id = $1
-        `, [id]);
+    // Validate ID is a number
+    if (isNaN(id)) {
+      return res.status(400).json({ error: 'Invalid club ID' });
+    }
     
+    // Query club with admin information
+    const result = await db.query(`
+      SELECT 
+        clubs.*,
+        users.name as admin_name,
+        users.email as admin_email
+      FROM clubs
+      LEFT JOIN users ON clubs.admin_id = users.id
+      WHERE clubs.id = $1
+    `, [id]);
+    
+    // Handle club not found
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Club not found' });
     }
     
+    // Return club details
     res.json({ club: result.rows[0] });
     
   } catch (error) {
