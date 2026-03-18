@@ -18,7 +18,9 @@ exports.getAllClubs = async (req, res) => {
     ORDER BY clubs.name
     `);
     
-    res.json({ clubs: result.rows });
+    if (result.rows.length === 0) {
+        return res.json({ clubs: [], message: 'No clubs found' });
+    }
   } catch (error) {
     console.error('Error fetching clubs:', error);
     res.status(500).json({ error: 'Failed to fetch clubs' });
