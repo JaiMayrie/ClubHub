@@ -149,21 +149,99 @@ exports.getClubById = async (req, res) => {
   }
 };
 
+/**
+ * Create a new club (admin only)
+ * 
+ * @route   POST /api/clubs
+ * @access  Private (Admin only)
+ * @body    {string} name - Club name (required)
+ * @body    {string} category - Club category (required)
+ * @body    {string} description - Club description (required)
+ * @body    {string} meeting_info - Meeting information (optional)
+ * @body    {string} contact_email - Contact email (optional)
+ * @returns {Object} club - Created club object
+ * 
+ * @example
+ * POST /api/clubs
+ * Headers: { Authorization: "Bearer <token>" }
+ * Body: {
+ *   "name": "Robotics Club",
+ *   "category": "Academic",
+ *   "description": "Build and program robots",
+ *   "meeting_info": "Fridays 5PM",
+ *   "contact_email": "robotics@purdue.edu"
+ * }
+ */
 exports.createClub = async (req, res) => {
   try {
     const { name, category, description, meeting_info, contact_email } = req.body;
     
-    // Validate required fields
+    // ========== VALIDATION 1: Required Fields ==========
     if (!name || !category || !description) {
       return res.status(400).json({ 
         error: 'Name, category, and description are required' 
       });
     }
     
-    res.json({ message: 'Validation passed' });
+    // ========== VALIDATION 2: Name Length ==========
+    if (name.length < 3 || name.length > 150) {
+      return res.status(400).json({ 
+        error: 'Club name must be between 3 and 150 characters' 
+      });
+    }
+    
+    // ========== VALIDATION 3: Valid Category ==========
+    const validCategories = [
+      'Academic', 
+      'Sports', 
+      'Arts', 
+      'Service', 
+      'Professional', 
+      'Special Interest'
+    ];
+    
+    if (!validCategories.includes(category)) {
+      return res.status(400).json({ 
+        error: `Invalid category. Must be one of: ${validCategories.join(', ')}` 
+      });
+    }
+    
+    // ========== VALIDATION 4: Contact Email Format ==========
+    if (contact_email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(contact_email)) {
+        return res.status(400).json({ 
+          error: 'Invalid contact email format' 
+        });
+      }
+    }
+    
+    // ========== AUTHORIZATION: Check Admin Role ==========
+    if (req.userRole !== 'admin') {
+      return res.status(403).json({ 
+        error: 'Only administrators can create clubs' 
+      });
+    }
+    
+    // ========== DATABASE: Insert New Club ==========
+    const result = await db.query(
+      `INSERT INTO clubs (name, category, description, meeting_info, contact_email, admin_id)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING *`,
+      [name, category, description, meeting_info, contact_email, req.userId]
+    );
+    
+    const club = result.rows[0];
+    
+    // ========== SUCCESS RESPONSE ==========
+    res.status(201).json({
+      message: 'Club created successfully',
+      club
+    });
     
   } catch (error) {
     console.error('Error creating club:', error);
-    res.status(500).json({ error: 'Failed to create club' });
-  }
-};
+    res.status(500).json({ 
+      error: 'Failed to create club',
+      message: 'An error occurred while creating the club'
+    })
