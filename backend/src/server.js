@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const clubRoutes = require('./routes/clubs');
 require('dotenv').config();
 
 /** 
@@ -9,8 +8,6 @@ require('dotenv').config();
  * Initializes Express app, middleware, routes, *
  * and starts the backend server.
  */
-
-const authRoutes = require('./routes/auth');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -36,6 +33,10 @@ app.get("/api/health", (req, res) => {
 app.get("/api", (req, res) => {
   res.json({ message: "Welcome to ClubHub API" });
 });
+
+// IMPORT ROUTES AFTER APP IS CREATED
+const authRoutes = require('./routes/auth');
+const clubRoutes = require('./routes/clubs');
 
 // Auth routes
 app.use('/api/auth', authRoutes);

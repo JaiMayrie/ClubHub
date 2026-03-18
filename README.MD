@@ -195,8 +195,46 @@ ClubHub/
 
 ## API Endpoints
 
+### Authentication
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - Login user
+- `GET /api/auth/me` - Get current user (requires auth)
+
+### Clubs (NEW - Sprint 2)
+- `GET /api/clubs` - Get all clubs
+  - Query params:
+    - `category` (optional) - Filter by category
+    - `search` (optional) - Search by name/description
+  - Example: `GET /api/clubs?category=Academic&search=data`
+- `GET /api/clubs/:id` - Get club by ID (coming soon)
+- `POST /api/clubs` - Create club (admin only, coming soon)
+- `GET /api/clubs/my-clubs` - Get current user's clubs (coming soon)
+
+### System
 - `GET /api/health` - Health check
 - `GET /api` - Welcome message
+
+## Testing Club Endpoints
+
+### Get All Clubs
+```bash
+curl http://localhost:5000/api/clubs
+```
+
+### Filter by Category
+```bash
+curl "http://localhost:5000/api/clubs?category=Academic"
+```
+
+### Search Clubs
+```bash
+curl "http://localhost:5000/api/clubs?search=chess"
+```
+
+### Combined Filters
+```bash
+curl "http://localhost:5000/api/clubs?category=Sports&search=basketball"
+```
 
 ## Contributing
 
