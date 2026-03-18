@@ -28,6 +28,7 @@ const db = require('../db');
  * // Search clubs
  * GET /api/clubs?search=chess
  */
+
 exports.getAllClubs = async (req, res) => {
   try {
     // Extract and sanitize query parameters
@@ -106,10 +107,15 @@ exports.getClubById = async (req, res) => {
   try {
     const { id } = req.params;
     
-    const result = await db.query(
-      'SELECT * FROM clubs WHERE id = $1',
-      [id]
-    );
+    const result = await db.query(`
+        SELECT 
+            clubs.*,
+            users.name as admin_name,
+            users.email as admin_email
+        FROM clubs
+        LEFT JOIN users ON clubs.admin_id = users.id
+        WHERE clubs.id = $1
+        `, [id]);
     
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Club not found' });
