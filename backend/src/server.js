@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const clubRoutes = require('./routes/clubs');
 require('dotenv').config();
 
 /** 
@@ -38,6 +39,9 @@ app.get("/api", (req, res) => {
 
 // Auth routes
 app.use('/api/auth', authRoutes);
+
+// Club routes
+app.use('/api/clubs', clubRoutes);
 
 // Prevent Jest from auto-starting server
 if (process.env.NODE_ENV !== 'test') {
