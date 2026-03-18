@@ -5,9 +5,18 @@ module.exports = {};
 
 exports.getAllClubs = async (req, res) => {
   try {
-    const result = await db.query(
-      'SELECT id, name, category, description, member_count FROM clubs ORDER BY name'
-    );
+    const result = await db.query(`
+    SELECT 
+        clubs.id, 
+        clubs.name, 
+        clubs.category, 
+        clubs.description, 
+        clubs.member_count,
+        users.name as admin_name
+    FROM clubs
+    LEFT JOIN users ON clubs.admin_id = users.id
+    ORDER BY clubs.name
+    `);
     
     res.json({ clubs: result.rows });
   } catch (error) {
