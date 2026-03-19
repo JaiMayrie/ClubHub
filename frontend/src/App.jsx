@@ -1,13 +1,19 @@
 import { Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
-import DashboardPage from "./pages/DashboardPage";
+import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import "./App.css";
+import DashboardPage from "./pages/DashboardPage";
+import BrowseClubsPage from "./pages/BrowseClubsPage";  
 
 function App() {
   return (
     <Routes>
+      {/* Public Routes */}
+      <Route path="/" element={<HomePage />} />
+      <Route path="/clubs" element={<BrowseClubsPage />} />
+      
+      {/* Auth Routes (redirect to dashboard if already logged in) */}
       <Route
         element={<ProtectedRoute requireAuth={false} redirectTo="/dashboard" />}
       >
@@ -15,8 +21,8 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
       </Route>
 
+      {/* Protected Routes */}
       <Route element={<ProtectedRoute requireAuth redirectTo="/login" />}>
-        <Route path="/" element={<DashboardPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
       </Route>
     </Routes>

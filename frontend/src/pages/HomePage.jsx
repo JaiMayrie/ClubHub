@@ -1,0 +1,136 @@
+import { Link } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
+
+function HomePage() {
+  const { user } = useAuth();
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-purdue-black py-4 px-6">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="bg-purdue-gold text-black px-6 py-2 rounded font-bold text-lg">
+            ClubHub
+          </div>
+          <nav className="flex gap-6">
+            {user ? (
+              <>
+                <Link
+                  to="/clubs"
+                  className="text-white hover:text-purdue-gold transition-colors font-medium"
+                >
+                  Clubs
+                </Link>
+                <Link
+                  to="/dashboard"
+                  className="text-white hover:text-purdue-gold transition-colors font-medium"
+                >
+                  My Dashboard
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/clubs"
+                  className="text-white hover:text-purdue-gold transition-colors font-medium"
+                >
+                  Clubs
+                </Link>
+                <Link
+                  to="/login"
+                  className="text-white hover:text-purdue-gold transition-colors font-medium"
+                >
+                  Login
+                </Link>
+              </>
+            )}
+          </nav>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <main className="container mx-auto px-4 py-16">
+        <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl p-16 text-center shadow-xl">
+          <h1 className="text-5xl font-bold mb-6">
+            Welcome to ClubHub
+          </h1>
+          <p className="text-xl text-gray-700 mb-12 max-w-2xl mx-auto">
+            Discover and join student organizations at Purdue Fort Wayne
+          </p>
+
+          <div className="flex gap-4 justify-center">
+            {user ? (
+              <Link
+                to="/clubs"
+                className="bg-purdue-gold text-black px-8 py-4 rounded-lg font-bold text-lg hover:bg-purdue-gold-dark transition-colors"
+              >
+                Browse Clubs
+              </Link>
+            ) : (
+              <>
+                <Link
+                  to="/clubs"
+                  className="bg-purdue-gold text-black px-8 py-4 rounded-lg font-bold text-lg hover:bg-purdue-gold-dark transition-colors"
+                >
+                  Browse Clubs
+                </Link>
+                <Link
+                  to="/register"
+                  className="bg-white text-purdue-black px-8 py-4 rounded-lg font-bold text-lg border-2 border-purdue-black hover:bg-gray-50 transition-colors"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Featured Clubs Section */}
+        <section className="mt-16">
+          <h2 className="text-3xl font-bold mb-8">Featured Clubs</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Placeholder Club Cards */}
+            {[1, 2].map((i) => (
+              <div
+                key={i}
+                className="bg-white border-2 border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow"
+              >
+                <h3 className="text-xl font-bold mb-2">Club Name</h3>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="bg-purdue-gold text-black px-3 py-1 rounded text-sm font-semibold">
+                    Category
+                  </span>
+                  <span className="text-gray-600">• 50 members</span>
+                </div>
+                <p className="text-gray-700 mb-4">
+                  Club description goes here...
+                </p>
+              </div>
+            ))}
+          </div>
+          
+          <div className="text-center mt-8">
+            <Link
+              to="/clubs"
+              className="text-purdue-gold hover:text-purdue-gold-dark font-semibold text-lg"
+            >
+              View all clubs →
+            </Link>
+          </div>
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-purdue-black text-white py-8 mt-16">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-gray-400">
+            © 2024 ClubHub - Purdue University Fort Wayne
+          </p>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+export default HomePage;
