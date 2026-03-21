@@ -280,3 +280,52 @@ exports.getMyClubs = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch clubs' });
   }
 };
+
+/**
+ * Get join requests for a specific club (admin only)
+ * 
+ * @route   GET /api/clubs/:id/join-requests
+ * @access  Private (club admin only)
+ */
+exports.getClubJoinRequests = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+
+    // Check if user is admin of this club
+    const clubCheck = await db.query(
+      'SELECT admin_id FROM clubs WHERE id = $1',
+      [id]
+    );
+
+    if (clubCheck.rows.length === 0) {
+      return res.status(404).json({ error: 'Club not found' });
+    }
+
+    if (clubCheck.rows[0].admin_id !== userId) {
+      return res.status(403).json({ error: 'You are not authorized to view requests for this club' });
+    }
+
+    // Get pending join requests with user information
+    const result = await db.query(
+      `SELECT 
+        join_requests.*,
+        users.name as user_name,
+        users.email as user_email
+       FROM join_requests
+       JOIN users ON join_requests.user_id = users.id
+       WHERE join_requests.club_id = $1 AND join_requests.status = $2
+       ORDER BY join_requests.created_at DESC`,
+      [id, 'pending']
+    );
+
+    res.json({
+      requests: result.rows,
+      count: result.rows.length
+    });
+
+  } catch (error) {
+    console.error('Error fetching join requests:', error);
+    res.status(500).json({ error: 'Failed to fetch join requests' });
+  }
+};

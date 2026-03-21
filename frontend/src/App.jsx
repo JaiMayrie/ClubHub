@@ -4,7 +4,8 @@ import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
-import BrowseClubsPage from "./pages/BrowseClubsPage";  
+import BrowseClubsPage from "./pages/BrowseClubsPage";
+import ClubDetailPage from "./pages/ClubDetailPage";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
       {/* Public Routes */}
       <Route path="/" element={<HomePage />} />
       <Route path="/clubs" element={<BrowseClubsPage />} />
+      <Route path="/clubs/:id" element={<ClubDetailPage />} />
       
       {/* Auth Routes (redirect to dashboard if already logged in) */}
       <Route

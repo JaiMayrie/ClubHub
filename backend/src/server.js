@@ -41,12 +41,20 @@ app.get("/", (req, res) => {
 // IMPORT ROUTES AFTER APP IS CREATED
 const authRoutes = require('./routes/auth');
 const clubRoutes = require('./routes/clubs');
+const joinRequestRoutes = require('./routes/joinRequests');
+const membershipRoutes = require('./routes/memberships');
 
 // Auth routes
 app.use('/api/auth', authRoutes);
 
 // Club routes
 app.use('/api/clubs', clubRoutes);
+
+// Join request routes
+app.use('/api/join-requests', joinRequestRoutes);
+
+// Membership routes
+app.use('/api/memberships', membershipRoutes);
 
 // Prevent Jest from auto-starting server
 if (process.env.NODE_ENV !== 'test') {

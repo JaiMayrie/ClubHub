@@ -1,11 +1,50 @@
+import { useState, useEffect } from 'react';
 import { useAuth } from "../hooks/useAuth";
 import { Link } from "react-router-dom";
+import { clubsAPI, membershipsAPI, joinRequestsAPI } from '../services/api';
 
 function DashboardPage() {
   const { user, logout } = useAuth();
+  const [myClubs, setMyClubs] = useState([]);
+  const [myMemberships, setMyMemberships] = useState([]);
+  const [joinRequests, setJoinRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Check if user is admin
   const isAdmin = user?.role === 'admin';
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [isAdmin]);
+
+  const fetchDashboardData = async () => {
+    try {
+      if (isAdmin) {
+        // Fetch clubs admin manages
+        const clubsData = await clubsAPI.getMyClubs();
+        setMyClubs(clubsData.clubs);
+      } else {
+        // Fetch student's memberships and join requests
+        const [membershipsData, requestsData] = await Promise.all([
+          membershipsAPI.getMy(),
+          joinRequestsAPI.getMy()
+        ]);
+        setMyMemberships(membershipsData.memberships);
+        setJoinRequests(requestsData.requests.filter(r => r.status === 'pending'));
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-gray-600">Loading dashboard...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -16,16 +55,10 @@ function DashboardPage() {
             ClubHub
           </div>
           <nav className="flex gap-6 items-center">
-            <Link
-              to="/clubs"
-              className="text-white hover:text-purdue-gold transition-colors font-medium"
-            >
+            <Link to="/clubs" className="text-white hover:text-purdue-gold transition-colors font-medium">
               Clubs
             </Link>
-            <Link
-              to="/dashboard"
-              className="text-white hover:text-purdue-gold transition-colors font-medium"
-            >
+            <Link to="/dashboard" className="text-white hover:text-purdue-gold transition-colors font-medium">
               My Dashboard
             </Link>
             <button
@@ -40,123 +73,213 @@ function DashboardPage() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        {/* Welcome Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">
             {isAdmin ? 'Admin Dashboard' : 'My Dashboard'}
           </h1>
-          <p className="text-xl text-gray-600">
-            Welcome back, {user?.name}!
-          </p>
+          <p className="text-xl text-gray-600">Welcome back, {user?.name}!</p>
         </div>
 
-        {/* Admin: Create New Club Button */}
-        {isAdmin && (
-          <div className="mb-8">
-            <Link
-              to="/clubs/create"
-              className="inline-block bg-purdue-gold text-black px-6 py-3 rounded-lg font-bold hover:bg-purdue-gold-dark transition-colors"
-            >
-              + Create New Club
-            </Link>
-          </div>
-        )}
+        {isAdmin ? (
+          // ADMIN VIEW
+          <>
+            <div className="mb-8">
+              <Link
+                to="/clubs/create"
+                className="inline-block bg-purdue-gold text-black px-6 py-3 rounded-lg font-bold hover:bg-purdue-gold-dark transition-colors"
+              >
+                + Create New Club
+              </Link>
+            </div>
 
-        {/* My Clubs Section */}
-        <section className="mb-12">
-          <div className="bg-white border-2 border-gray-200 rounded-lg p-6">
-            <h2 className="text-xl font-bold text-gray-600 uppercase mb-6">
-              MY CLUBS ({isAdmin ? '2' : '2'})
-            </h2>
-
-            <div className="space-y-4">
-              {/* Club Card 1 */}
+            <section>
               <div className="bg-white border-2 border-gray-200 rounded-lg p-6">
-                <h3 className="text-2xl font-bold mb-2">Purdue Hackers</h3>
-                <p className="text-gray-600 mb-4">
-                  {isAdmin 
-                    ? '120 members • 3 pending requests' 
-                    : 'Member since Jan 2025'}
-                </p>
-                
-                {isAdmin ? (
-                  <div className="flex gap-3">
-                    <button className="bg-purdue-gold text-black px-6 py-2 rounded font-semibold hover:bg-purdue-gold-dark transition-colors">
-                      Manage Club
-                    </button>
-                    <button className="bg-gray-200 text-black px-6 py-2 rounded font-semibold hover:bg-gray-300 transition-colors">
-                      View Requests
-                    </button>
-                  </div>
+                <h2 className="text-xl font-bold text-gray-600 uppercase mb-6">
+                  MY CLUBS ({myClubs.length})
+                </h2>
+
+                {myClubs.length === 0 ? (
+                  <p className="text-gray-600">You haven't created any clubs yet.</p>
                 ) : (
-                  <button className="bg-gray-200 text-black px-6 py-2 rounded font-semibold hover:bg-gray-300 transition-colors">
-                    View Club
-                  </button>
+                  <div className="space-y-4">
+                    {myClubs.map(club => (
+                      <AdminClubCard key={club.id} club={club} />
+                    ))}
+                  </div>
                 )}
               </div>
-
-              {/* Club Card 2 */}
+            </section>
+          </>
+        ) : (
+          // STUDENT VIEW
+          <>
+            {/* Memberships */}
+            <section className="mb-12">
               <div className="bg-white border-2 border-gray-200 rounded-lg p-6">
-                <h3 className="text-2xl font-bold mb-2">
-                  {isAdmin ? 'Data Mine' : 'Chess Club'}
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  {isAdmin 
-                    ? '200 members • 8 pending requests' 
-                    : 'Member since Feb 2025'}
-                </p>
-                
-                {isAdmin ? (
-                  <div className="flex gap-3">
-                    <button className="bg-purdue-gold text-black px-6 py-2 rounded font-semibold hover:bg-purdue-gold-dark transition-colors">
-                      Manage Club
-                    </button>
-                    <button className="bg-gray-200 text-black px-6 py-2 rounded font-semibold hover:bg-gray-300 transition-colors">
-                      View Requests
-                    </button>
-                  </div>
+                <h2 className="text-xl font-bold text-gray-600 uppercase mb-6">
+                  MY CLUBS ({myMemberships.length})
+                </h2>
+
+                {myMemberships.length === 0 ? (
+                  <p className="text-gray-600">
+                    You haven't joined any clubs yet.{' '}
+                    <Link to="/clubs" className="text-purdue-gold hover:underline">
+                      Browse clubs
+                    </Link>
+                  </p>
                 ) : (
-                  <button className="bg-gray-200 text-black px-6 py-2 rounded font-semibold hover:bg-gray-300 transition-colors">
-                    View Club
-                  </button>
+                  <div className="space-y-4">
+                    {myMemberships.map(membership => (
+                      <StudentClubCard key={membership.id} membership={membership} />
+                    ))}
+                  </div>
                 )}
               </div>
-            </div>
-          </div>
-        </section>
+            </section>
 
-        {/* Student Only: Pending Requests Section */}
-        {!isAdmin && (
-          <section>
-            <div className="bg-white border-2 border-gray-200 rounded-lg p-6">
-              <h2 className="text-xl font-bold text-gray-600 uppercase mb-6">
-                PENDING REQUESTS (1)
-              </h2>
-
+            {/* Pending Requests */}
+            <section>
               <div className="bg-white border-2 border-gray-200 rounded-lg p-6">
-                <h3 className="text-2xl font-bold mb-3">Data Mine</h3>
-                <div className="flex items-center gap-3">
-                  <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded font-semibold text-sm">
-                    Pending
-                  </span>
-                  <span className="text-gray-600">
-                    Requested on Feb 1, 2025
-                  </span>
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
+                <h2 className="text-xl font-bold text-gray-600 uppercase mb-6">
+                  PENDING REQUESTS ({joinRequests.length})
+                </h2>
 
-        {/* Admin Note */}
-        {isAdmin && (
-          <div className="mt-8 bg-yellow-50 border-l-4 border-purdue-gold p-4">
-            <p className="text-gray-700">
-              <span className="font-bold">Notes:</span> Create club button, manage existing clubs, see pending requests
-            </p>
-          </div>
+                {joinRequests.length === 0 ? (
+                  <p className="text-gray-600">No pending join requests.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {joinRequests.map(request => (
+                      <PendingRequestCard key={request.id} request={request} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
+          </>
         )}
       </main>
+    </div>
+  );
+}
+
+// Admin Club Card Component
+function AdminClubCard({ club }) {
+  const [requests, setRequests] = useState([]);
+  const [loadingRequests, setLoadingRequests] = useState(false);
+
+  useEffect(() => {
+    fetchRequests();
+  }, [club.id]);
+
+  const fetchRequests = async () => {
+    setLoadingRequests(true);
+    try {
+      const data = await joinRequestsAPI.getForClub(club.id);
+      setRequests(data.requests);
+    } catch (error) {
+      console.error('Error fetching requests:', error);
+    } finally {
+      setLoadingRequests(false);
+    }
+  };
+
+  const handleRequestAction = async (requestId, status) => {
+    try {
+      await joinRequestsAPI.updateStatus(requestId, status);
+      // Refresh requests
+      fetchRequests();
+    } catch (error) {
+      console.error('Error updating request:', error);
+      alert('Failed to update request');
+    }
+  };
+
+  return (
+    <div className="bg-white border-2 border-gray-200 rounded-lg p-6">
+      <h3 className="text-2xl font-bold mb-2">{club.name}</h3>
+      <p className="text-gray-600 mb-4">
+        {club.member_count} members • {requests.length} pending requests
+      </p>
+
+      <div className="flex gap-3 mb-4">
+        <Link
+          to={`/clubs/${club.id}`}
+          className="bg-purdue-gold text-black px-6 py-2 rounded font-semibold hover:bg-purdue-gold-dark transition-colors"
+        >
+          Manage Club
+        </Link>
+      </div>
+
+      {/* Pending Requests */}
+      {requests.length > 0 && (
+        <div className="mt-4 pt-4 border-t-2 border-gray-200">
+          <h4 className="font-bold mb-3">Pending Join Requests:</h4>
+          <div className="space-y-3">
+            {requests.map(request => (
+              <div key={request.id} className="bg-gray-50 p-3 rounded">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="font-semibold">{request.user_name}</p>
+                    <p className="text-sm text-gray-600">{request.user_email}</p>
+                    {request.message && (
+                      <p className="text-sm mt-1 italic">"{request.message}"</p>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleRequestAction(request.id, 'approved')}
+                      className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => handleRequestAction(request.id, 'rejected')}
+                      className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Student Club Card Component
+function StudentClubCard({ membership }) {
+  return (
+    <div className="bg-white border-2 border-gray-200 rounded-lg p-6">
+      <h3 className="text-2xl font-bold mb-2">{membership.club_name}</h3>
+      <p className="text-gray-600 mb-4">
+        Member since {new Date(membership.joined_at).toLocaleDateString()}
+      </p>
+      <Link
+        to={`/clubs/${membership.club_id}`}
+        className="bg-gray-200 text-black px-6 py-2 rounded font-semibold hover:bg-gray-300 transition-colors inline-block"
+      >
+        View Club
+      </Link>
+    </div>
+  );
+}
+
+// Pending Request Card Component
+function PendingRequestCard({ request }) {
+  return (
+    <div className="bg-white border-2 border-gray-200 rounded-lg p-6">
+      <h3 className="text-2xl font-bold mb-3">{request.club_name}</h3>
+      <div className="flex items-center gap-3">
+        <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded font-semibold text-sm">
+          Pending
+        </span>
+        <span className="text-gray-600">
+          Requested on {new Date(request.created_at).toLocaleDateString()}
+        </span>
+      </div>
     </div>
   );
 }

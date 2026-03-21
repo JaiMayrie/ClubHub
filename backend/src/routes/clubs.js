@@ -12,6 +12,9 @@ router.get('/my-clubs', authenticate, clubController.getMyClubs);
 // Dynamic route (AFTER specific routes)
 router.get('/:id', clubController.getClubById);
 
+// Get join requests for a club (admin only) - MUST BE BEFORE general :id route
+router.get('/:id/join-requests', authenticate, clubController.getClubJoinRequests);
+
 // Admin-only route (create club)
 router.post('/', authenticate, clubController.createClub);
 
