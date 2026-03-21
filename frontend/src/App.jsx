@@ -6,6 +6,7 @@ import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
 import BrowseClubsPage from "./pages/BrowseClubsPage";
 import ClubDetailPage from "./pages/ClubDetailPage";
+import CreateClubPage from "./pages/CreateClubPage";  // NEW
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
       {/* Protected Routes */}
       <Route element={<ProtectedRoute requireAuth redirectTo="/login" />}>
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/clubs/create" element={<CreateClubPage />} />  {/* NEW */}
       </Route>
     </Routes>
   );
