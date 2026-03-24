@@ -45,6 +45,8 @@ INSERT INTO users (id, name, email, password_hash, role) VALUES
 (29, 'Ryan Bell',       'rbell@student.pfw.edu',    '$2b$12$cY2f5RVZoeSjB/t.l.3F1.aV5UMrgwGB538FGn1.vMCjPRRByV33u', 'student'),
 (30, 'Grace Liu',       'gliu@student.pfw.edu',     '$2b$12$cY2f5RVZoeSjB/t.l.3F1.aV5UMrgwGB538FGn1.vMCjPRRByV33u', 'student');
 
+SELECT setval('users_id_seq', 30);
+
 -- ============================================
 -- CLUBS
 -- Real PFW student organizations with authentic descriptions
@@ -191,6 +193,8 @@ INSERT INTO clubs (id, name, category, description, meeting_info, contact_email,
      'Weekly Fridays, 1:30 PM – Walb Student Union (prayer room) + bi-weekly meetings',
      'msa@pfw.edu',
      20, 39);
+
+SELECT setval('clubs_id_seq', 20);
 
 -- ============================================
 -- MEMBERSHIPS

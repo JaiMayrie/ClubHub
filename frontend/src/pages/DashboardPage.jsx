@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from "../hooks/useAuth";
 import { Link } from "react-router-dom";
 import { clubsAPI, membershipsAPI, joinRequestsAPI } from '../services/api';
@@ -12,11 +12,7 @@ function DashboardPage() {
 
   const isAdmin = user?.role === 'admin';
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, [isAdmin]);
-
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       if (isAdmin) {
         // Fetch clubs admin manages
@@ -36,7 +32,11 @@ function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [isAdmin]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
   if (loading) {
     return (
@@ -167,11 +167,7 @@ function AdminClubCard({ club }) {
   const [requests, setRequests] = useState([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
 
-  useEffect(() => {
-    fetchRequests();
-  }, [club.id]);
-
-  const fetchRequests = async () => {
+  const fetchRequests = useCallback(async () => {
     setLoadingRequests(true);
     try {
       const data = await joinRequestsAPI.getForClub(club.id);
@@ -181,7 +177,11 @@ function AdminClubCard({ club }) {
     } finally {
       setLoadingRequests(false);
     }
-  };
+  }, [club.id]);
+
+  useEffect(() => {
+    fetchRequests();
+  }, [fetchRequests]);
 
   const handleRequestAction = async (requestId, status) => {
     try {
@@ -198,7 +198,7 @@ function AdminClubCard({ club }) {
     <div className="bg-white border-2 border-gray-200 rounded-lg p-6">
       <h3 className="text-2xl font-bold mb-2">{club.name}</h3>
       <p className="text-gray-600 mb-4">
-        {club.member_count} members • {requests.length} pending requests
+        {club.member_count} members • {loadingRequests ? '…' : requests.length} pending requests
       </p>
 
       <div className="flex gap-3 mb-4">
