@@ -28,6 +28,11 @@ In `docker-compose.yml`, this mount is configured:
 
 On first startup of an empty Postgres volume, files in that folder are executed automatically.
 
+To fill the database with info run `npm run db:seed`:
+
+- The password for each user is _Password123!_
+- It clears all tables, so make sure you have no important info in the db
+
 ### Important
 
 - Initialization runs only when DB data is empty.
@@ -92,6 +97,10 @@ After connecting, you can browse tables under:
 - View DB logs:
   ```bash
   docker compose logs -f db
+  ```
+- Seed database
+  ```bash
+  npm run db:seed
   ```
 
 ## Notes

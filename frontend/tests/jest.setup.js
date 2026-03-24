@@ -9,4 +9,4 @@ if (!global.TextDecoder) {
   global.TextDecoder = TextDecoder;
 }
 
-process.env.VITE_API_URL = "http://localhost:5000";
+process.env.VITE_API_URL = "http://localhost:5000/api";
