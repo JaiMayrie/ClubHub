@@ -1,8 +1,15 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 function NavHeader({ backTo, backLabel = "← Back to Home" }) {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  // Navigate a user back to home page on logout and clear auth state
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
   return (
     <header className="bg-purdue-black py-4 px-6">
@@ -37,7 +44,7 @@ function NavHeader({ backTo, backLabel = "← Back to Home" }) {
                   My Dashboard
                 </Link>
                 <button
-                  onClick={logout}
+                  onClick={handleLogout}
                   className="bg-purdue-gold text-black px-4 py-2 rounded font-semibold hover:bg-purdue-gold-dark transition-colors"
                 >
                   Logout
@@ -46,7 +53,7 @@ function NavHeader({ backTo, backLabel = "← Back to Home" }) {
             ) : (
               <Link
                 to="/login"
-                className="text-white hover:text-purdue-gold transition-colors font-medium"
+                className="bg-purdue-gold text-black px-4 py-2 rounded font-semibold hover:bg-purdue-gold-dark transition-colors"
               >
                 Login
               </Link>
