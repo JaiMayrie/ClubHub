@@ -1,59 +1,18 @@
-import { Link } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { Link } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
+import NavHeader from "../components/NavHeader";
 
 function HomePage() {
   const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-purdue-black py-4 px-6">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="bg-purdue-gold text-black px-6 py-2 rounded font-bold text-lg">
-            ClubHub
-          </div>
-          <nav className="flex gap-6">
-            {user ? (
-              <>
-                <Link
-                  to="/clubs"
-                  className="text-white hover:text-purdue-gold transition-colors font-medium"
-                >
-                  Clubs
-                </Link>
-                <Link
-                  to="/dashboard"
-                  className="text-white hover:text-purdue-gold transition-colors font-medium"
-                >
-                  My Dashboard
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link
-                  to="/clubs"
-                  className="text-white hover:text-purdue-gold transition-colors font-medium"
-                >
-                  Clubs
-                </Link>
-                <Link
-                  to="/login"
-                  className="text-white hover:text-purdue-gold transition-colors font-medium"
-                >
-                  Login
-                </Link>
-              </>
-            )}
-          </nav>
-        </div>
-      </header>
+      <NavHeader />
 
       {/* Hero Section */}
       <main className="container mx-auto px-4 py-16">
         <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl p-16 text-center shadow-xl">
-          <h1 className="text-5xl font-bold mb-6">
-            Welcome to ClubHub
-          </h1>
+          <h1 className="text-5xl font-bold mb-6">Welcome to ClubHub</h1>
           <p className="text-xl text-gray-700 mb-12 max-w-2xl mx-auto">
             Discover and join student organizations at Purdue Fort Wayne
           </p>
@@ -88,7 +47,7 @@ function HomePage() {
         {/* Featured Clubs Section */}
         <section className="mt-16">
           <h2 className="text-3xl font-bold mb-8">Featured Clubs</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Placeholder Club Cards */}
             {[1, 2].map((i) => (
@@ -109,7 +68,7 @@ function HomePage() {
               </div>
             ))}
           </div>
-          
+
           <div className="text-center mt-8">
             <Link
               to="/clubs"

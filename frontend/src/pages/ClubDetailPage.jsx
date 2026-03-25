@@ -1,19 +1,20 @@
-import { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import { clubsAPI, joinRequestsAPI } from '../services/api';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
+import NavHeader from "../components/NavHeader";
+import { clubsAPI, joinRequestsAPI } from "../services/api";
 
 function ClubDetailPage() {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
-  
+
   const [club, setClub] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [joinMessage, setJoinMessage] = useState('');
+  const [joinMessage, setJoinMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   useEffect(() => {
     fetchClubDetails();
@@ -24,8 +25,8 @@ function ClubDetailPage() {
       const data = await clubsAPI.getById(id);
       setClub(data.club);
     } catch (error) {
-      console.error('Error fetching club:', error);
-      setError('Failed to load club details');
+      console.error("Error fetching club:", error);
+      setError("Failed to load club details");
     } finally {
       setLoading(false);
     }
@@ -33,22 +34,22 @@ function ClubDetailPage() {
 
   const handleJoinRequest = async (e) => {
     e.preventDefault();
-    
+
     if (!user) {
-      navigate('/login');
+      navigate("/login");
       return;
     }
 
     setSubmitting(true);
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     try {
       await joinRequestsAPI.submit(id, joinMessage);
-      setSuccess('Join request submitted successfully!');
-      setJoinMessage('');
+      setSuccess("Join request submitted successfully!");
+      setJoinMessage("");
     } catch (error) {
-      setError(error.response?.data?.error || 'Failed to submit join request');
+      setError(error.response?.data?.error || "Failed to submit join request");
     } finally {
       setSubmitting(false);
     }
@@ -77,24 +78,7 @@ function ClubDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-purdue-black py-4 px-6">
-        <div className="container mx-auto flex justify-between items-center">
-          <Link to="/" className="bg-purdue-gold text-black px-6 py-2 rounded font-bold text-lg">
-            ClubHub
-          </Link>
-          <nav className="flex gap-6">
-            <Link to="/clubs" className="text-white hover:text-purdue-gold transition-colors font-medium">
-              Clubs
-            </Link>
-            {user && (
-              <Link to="/dashboard" className="text-white hover:text-purdue-gold transition-colors font-medium">
-                My Dashboard
-              </Link>
-            )}
-          </nav>
-        </div>
-      </header>
+      <NavHeader />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
@@ -112,7 +96,9 @@ function ClubDetailPage() {
               <span className="bg-purdue-gold text-black px-4 py-2 rounded font-semibold">
                 {club.category}
               </span>
-              <span className="text-gray-600">• {club.member_count} members</span>
+              <span className="text-gray-600">
+                • {club.member_count} members
+              </span>
             </div>
           </div>
 
@@ -169,7 +155,10 @@ function ClubDetailPage() {
 
               <form onSubmit={handleJoinRequest} className="space-y-4">
                 <div>
-                  <label htmlFor="message" className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label
+                    htmlFor="message"
+                    className="block text-sm font-semibold text-gray-700 mb-2"
+                  >
                     Message to Club Admin (Optional)
                   </label>
                   <textarea
@@ -187,7 +176,7 @@ function ClubDetailPage() {
                   disabled={submitting}
                   className="bg-purdue-gold text-black px-8 py-3 rounded-lg font-bold hover:bg-purdue-gold-dark transition-colors disabled:opacity-50"
                 >
-                  {submitting ? 'Submitting...' : 'Submit Join Request'}
+                  {submitting ? "Submitting..." : "Submit Join Request"}
                 </button>
               </form>
             </div>
@@ -196,10 +185,13 @@ function ClubDetailPage() {
           {!user && (
             <div className="mt-8 pt-8 border-t-2 border-gray-200">
               <p className="text-gray-600">
-                <Link to="/login" className="text-purdue-gold hover:underline font-semibold">
+                <Link
+                  to="/login"
+                  className="text-purdue-gold hover:underline font-semibold"
+                >
                   Log in
-                </Link>
-                {' '}to request to join this club
+                </Link>{" "}
+                to request to join this club
               </p>
             </div>
           )}

@@ -1,45 +1,46 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { clubsAPI } from '../services/api';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import NavHeader from "../components/NavHeader";
+import { clubsAPI } from "../services/api";
 
 function CreateClubPage() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: '',
-    category: '',
-    description: '',
-    meeting_info: '',
-    contact_email: ''
+    name: "",
+    category: "",
+    description: "",
+    meeting_info: "",
+    contact_email: "",
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const categories = [
-    'Academic',
-    'Sports',
-    'Arts',
-    'Service',
-    'Professional',
-    'Special Interest'
+    "Academic",
+    "Sports",
+    "Arts",
+    "Service",
+    "Professional",
+    "Special Interest",
   ];
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       await clubsAPI.create(formData);
-      navigate('/dashboard');
+      navigate("/dashboard");
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to create club');
+      setError(err.response?.data?.error || "Failed to create club");
     } finally {
       setLoading(false);
     }
@@ -47,17 +48,7 @@ function CreateClubPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-purdue-black py-4 px-6">
-        <div className="container mx-auto flex justify-between items-center">
-          <Link to="/" className="bg-purdue-gold text-black px-6 py-2 rounded font-bold text-lg">
-            ClubHub
-          </Link>
-          <Link to="/dashboard" className="text-white hover:text-purdue-gold transition-colors">
-            ← Back to Dashboard
-          </Link>
-        </div>
-      </header>
+      <NavHeader backTo="/dashboard" backLabel="← Back to Dashboard" />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 max-w-2xl">
@@ -73,7 +64,10 @@ function CreateClubPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Club Name */}
             <div>
-              <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label
+                htmlFor="name"
+                className="block text-sm font-semibold text-gray-700 mb-2"
+              >
                 Club Name *
               </label>
               <input
@@ -93,7 +87,10 @@ function CreateClubPage() {
 
             {/* Category */}
             <div>
-              <label htmlFor="category" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label
+                htmlFor="category"
+                className="block text-sm font-semibold text-gray-700 mb-2"
+              >
                 Category *
               </label>
               <select
@@ -105,15 +102,20 @@ function CreateClubPage() {
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purdue-gold focus:outline-none"
               >
                 <option value="">Select a category</option>
-                {categories.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
                 ))}
               </select>
             </div>
 
             {/* Description */}
             <div>
-              <label htmlFor="description" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label
+                htmlFor="description"
+                className="block text-sm font-semibold text-gray-700 mb-2"
+              >
                 Description *
               </label>
               <textarea
@@ -130,7 +132,10 @@ function CreateClubPage() {
 
             {/* Meeting Info */}
             <div>
-              <label htmlFor="meeting_info" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label
+                htmlFor="meeting_info"
+                className="block text-sm font-semibold text-gray-700 mb-2"
+              >
                 Meeting Information (Optional)
               </label>
               <input
@@ -146,7 +151,10 @@ function CreateClubPage() {
 
             {/* Contact Email */}
             <div>
-              <label htmlFor="contact_email" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label
+                htmlFor="contact_email"
+                className="block text-sm font-semibold text-gray-700 mb-2"
+              >
                 Contact Email (Optional)
               </label>
               <input
@@ -167,7 +175,7 @@ function CreateClubPage() {
                 disabled={loading}
                 className="flex-1 bg-purdue-gold text-black py-3 rounded-lg font-bold hover:bg-purdue-gold-dark transition-colors disabled:opacity-50"
               >
-                {loading ? 'Creating...' : 'Create Club'}
+                {loading ? "Creating..." : "Create Club"}
               </button>
               <Link
                 to="/dashboard"
