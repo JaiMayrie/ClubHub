@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import NavHeader from "../components/NavHeader";
@@ -16,11 +16,7 @@ function ClubDetailPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  useEffect(() => {
-    fetchClubDetails();
-  }, [id]);
-
-  const fetchClubDetails = async () => {
+  const fetchClubDetails = useCallback(async () => {
     try {
       const data = await clubsAPI.getById(id);
       setClub(data.club);
@@ -30,7 +26,11 @@ function ClubDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    fetchClubDetails();
+  }, [fetchClubDetails]);
 
   const handleJoinRequest = async (e) => {
     e.preventDefault();

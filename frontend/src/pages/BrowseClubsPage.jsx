@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import NavHeader from "../components/NavHeader";
 import { clubsAPI } from "../services/api";
 
@@ -18,7 +18,7 @@ function BrowseClubsPage() {
     "Special Interest",
   ];
 
-  const fetchClubs = async () => {
+  const fetchClubs = useCallback(async () => {
     setLoading(true);
     try {
       const params = {};
@@ -32,11 +32,11 @@ function BrowseClubsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [search, category]);
 
   useEffect(() => {
     fetchClubs();
-  }, [search, category]);
+  }, [fetchClubs]);
 
   return (
     <div className="min-h-screen bg-gray-50">
