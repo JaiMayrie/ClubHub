@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import NavHeader from "../components/NavHeader";
 
 function RegisterPage() {
   const { register } = useAuth();
@@ -28,20 +29,7 @@ function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-purdue-black py-4 px-6">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="bg-purdue-gold text-black px-6 py-2 rounded font-bold text-lg">
-            ClubHub
-          </div>
-          <Link
-            to="/"
-            className="text-white hover:text-purdue-gold transition-colors"
-          >
-            ← Back to Home
-          </Link>
-        </div>
-      </header>
+      <NavHeader backTo="/" />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-16 max-w-md">
@@ -126,14 +114,17 @@ function RegisterPage() {
               disabled={loading}
               className="w-full bg-purdue-gold text-black py-3 rounded-lg font-bold text-lg hover:bg-purdue-gold-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Creating Account...' : 'Sign Up'}
+              {loading ? "Creating Account..." : "Sign Up"}
             </button>
           </form>
 
           {/* Login Link */}
           <p className="text-center mt-6 text-gray-600">
-            Already have an account?{' '}
-            <Link to="/login" className="text-purdue-gold hover:text-purdue-gold-dark font-semibold">
+            Already have an account?{" "}
+            <Link
+              to="/login"
+              className="text-purdue-gold hover:text-purdue-gold-dark font-semibold"
+            >
               Login
             </Link>
           </p>

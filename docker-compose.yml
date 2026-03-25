@@ -73,6 +73,7 @@ services:
       - clubhub-network
     stdin_open: true
     tty: true
+    command: npm run dev
 
 volumes:
   postgres_data:

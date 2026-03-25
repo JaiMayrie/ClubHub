@@ -1,16 +1,17 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from "../hooks/useAuth";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { clubsAPI, membershipsAPI, joinRequestsAPI } from '../services/api';
+import { useAuth } from "../hooks/useAuth";
+import NavHeader from "../components/NavHeader";
+import { clubsAPI, membershipsAPI, joinRequestsAPI } from "../services/api";
 
 function DashboardPage() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [myClubs, setMyClubs] = useState([]);
   const [myMemberships, setMyMemberships] = useState([]);
   const [joinRequests, setJoinRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === "admin";
 
   const fetchDashboardData = useCallback(async () => {
     try {
@@ -22,13 +23,15 @@ function DashboardPage() {
         // Fetch student's memberships and join requests
         const [membershipsData, requestsData] = await Promise.all([
           membershipsAPI.getMy(),
-          joinRequestsAPI.getMy()
+          joinRequestsAPI.getMy(),
         ]);
         setMyMemberships(membershipsData.memberships);
-        setJoinRequests(requestsData.requests.filter(r => r.status === 'pending'));
+        setJoinRequests(
+          requestsData.requests.filter((r) => r.status === "pending"),
+        );
       }
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      console.error("Error fetching dashboard data:", error);
     } finally {
       setLoading(false);
     }
@@ -48,34 +51,13 @@ function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-purdue-black py-4 px-6">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="bg-purdue-gold text-black px-6 py-2 rounded font-bold text-lg">
-            ClubHub
-          </div>
-          <nav className="flex gap-6 items-center">
-            <Link to="/clubs" className="text-white hover:text-purdue-gold transition-colors font-medium">
-              Clubs
-            </Link>
-            <Link to="/dashboard" className="text-white hover:text-purdue-gold transition-colors font-medium">
-              My Dashboard
-            </Link>
-            <button
-              onClick={logout}
-              className="bg-purdue-gold text-black px-4 py-2 rounded font-semibold hover:bg-purdue-gold-dark transition-colors"
-            >
-              Logout
-            </button>
-          </nav>
-        </div>
-      </header>
+      <NavHeader />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">
-            {isAdmin ? 'Admin Dashboard' : 'My Dashboard'}
+            {isAdmin ? "Admin Dashboard" : "My Dashboard"}
           </h1>
           <p className="text-xl text-gray-600">Welcome back, {user?.name}!</p>
         </div>
@@ -99,10 +81,12 @@ function DashboardPage() {
                 </h2>
 
                 {myClubs.length === 0 ? (
-                  <p className="text-gray-600">You haven't created any clubs yet.</p>
+                  <p className="text-gray-600">
+                    You haven't created any clubs yet.
+                  </p>
                 ) : (
                   <div className="space-y-4">
-                    {myClubs.map(club => (
+                    {myClubs.map((club) => (
                       <AdminClubCard key={club.id} club={club} />
                     ))}
                   </div>
@@ -122,15 +106,21 @@ function DashboardPage() {
 
                 {myMemberships.length === 0 ? (
                   <p className="text-gray-600">
-                    You haven't joined any clubs yet.{' '}
-                    <Link to="/clubs" className="text-purdue-gold hover:underline">
+                    You haven't joined any clubs yet.{" "}
+                    <Link
+                      to="/clubs"
+                      className="text-purdue-gold hover:underline"
+                    >
                       Browse clubs
                     </Link>
                   </p>
                 ) : (
                   <div className="space-y-4">
-                    {myMemberships.map(membership => (
-                      <StudentClubCard key={membership.id} membership={membership} />
+                    {myMemberships.map((membership) => (
+                      <StudentClubCard
+                        key={membership.id}
+                        membership={membership}
+                      />
                     ))}
                   </div>
                 )}
@@ -148,7 +138,7 @@ function DashboardPage() {
                   <p className="text-gray-600">No pending join requests.</p>
                 ) : (
                   <div className="space-y-4">
-                    {joinRequests.map(request => (
+                    {joinRequests.map((request) => (
                       <PendingRequestCard key={request.id} request={request} />
                     ))}
                   </div>
@@ -173,7 +163,7 @@ function AdminClubCard({ club }) {
       const data = await joinRequestsAPI.getForClub(club.id);
       setRequests(data.requests);
     } catch (error) {
-      console.error('Error fetching requests:', error);
+      console.error("Error fetching requests:", error);
     } finally {
       setLoadingRequests(false);
     }
@@ -189,8 +179,8 @@ function AdminClubCard({ club }) {
       // Refresh requests
       fetchRequests();
     } catch (error) {
-      console.error('Error updating request:', error);
-      alert('Failed to update request');
+      console.error("Error updating request:", error);
+      alert("Failed to update request");
     }
   };
 
@@ -198,7 +188,8 @@ function AdminClubCard({ club }) {
     <div className="bg-white border-2 border-gray-200 rounded-lg p-6">
       <h3 className="text-2xl font-bold mb-2">{club.name}</h3>
       <p className="text-gray-600 mb-4">
-        {club.member_count} members • {loadingRequests ? '…' : requests.length} pending requests
+        {club.member_count} members • {loadingRequests ? "…" : requests.length}{" "}
+        pending requests
       </p>
 
       <div className="flex gap-3 mb-4">
@@ -215,25 +206,31 @@ function AdminClubCard({ club }) {
         <div className="mt-4 pt-4 border-t-2 border-gray-200">
           <h4 className="font-bold mb-3">Pending Join Requests:</h4>
           <div className="space-y-3">
-            {requests.map(request => (
+            {requests.map((request) => (
               <div key={request.id} className="bg-gray-50 p-3 rounded">
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="font-semibold">{request.user_name}</p>
-                    <p className="text-sm text-gray-600">{request.user_email}</p>
+                    <p className="text-sm text-gray-600">
+                      {request.user_email}
+                    </p>
                     {request.message && (
                       <p className="text-sm mt-1 italic">"{request.message}"</p>
                     )}
                   </div>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => handleRequestAction(request.id, 'approved')}
+                      onClick={() =>
+                        handleRequestAction(request.id, "approved")
+                      }
                       className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600"
                     >
                       Approve
                     </button>
                     <button
-                      onClick={() => handleRequestAction(request.id, 'rejected')}
+                      onClick={() =>
+                        handleRequestAction(request.id, "rejected")
+                      }
                       className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
                     >
                       Reject
