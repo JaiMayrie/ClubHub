@@ -329,3 +329,51 @@ exports.getClubJoinRequests = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch join requests' });
   }
 };
+
+exports.updateClub = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, category, description, meeting_info, contact_email } = req.body;
+    const userId = req.userId;
+
+    // Check club exists and user is the admin
+    const clubCheck = await db.query(
+      'SELECT admin_id FROM clubs WHERE id = $1', [id]
+    );
+    if (clubCheck.rows.length === 0) {
+      return res.status(404).json({ error: 'Club not found' });
+    }
+    if (clubCheck.rows[0].admin_id !== userId) {
+      return res.status(403).json({ error: 'Only the club admin can edit this club' });
+    }
+
+    const validCategories = ['Academic','Sports','Arts','Service','Professional','Special Interest'];
+    if (category && !validCategories.includes(category)) {
+      return res.status(400).json({ error: `Invalid category. Must be one of: ${validCategories.join(', ')}` });
+    }
+    if (contact_email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(contact_email)) {
+        return res.status(400).json({ error: 'Invalid contact email format' });
+      }
+    }
+
+    const result = await db.query(
+      `UPDATE clubs
+       SET name = COALESCE($1, name),
+           category = COALESCE($2, category),
+           description = COALESCE($3, description),
+           meeting_info = COALESCE($4, meeting_info),
+           contact_email = COALESCE($5, contact_email),
+           updated_at = NOW()
+       WHERE id = $6
+       RETURNING *`,
+      [name, category, description, meeting_info, contact_email, id]
+    );
+
+    res.json({ message: 'Club updated successfully', club: result.rows[0] });
+  } catch (error) {
+    console.error('Error updating club:', error);
+    res.status(500).json({ error: 'Failed to update club' });
+  }
+};

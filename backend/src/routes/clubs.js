@@ -18,4 +18,6 @@ router.get('/:id/join-requests', authenticate, clubController.getClubJoinRequest
 // Admin-only route (create club)
 router.post('/', authenticate, clubController.createClub);
 
+router.patch('/:id', authenticate, clubController.updateClub);
+
 module.exports = router;
