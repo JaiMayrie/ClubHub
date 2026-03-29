@@ -56,6 +56,27 @@ app.use('/api/join-requests', joinRequestRoutes);
 // Membership routes
 app.use('/api/memberships', membershipRoutes);
 
+// 404 handler — catches any route that didn't match above
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'Not found',
+    message: `Cannot ${req.method} ${req.path}`,
+  });
+});
+
+// Global error handler — catches any error passed via next(err)
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+
+  const status = err.status || err.statusCode || 500;
+  const message = err.message || 'An unexpected error occurred';
+
+  res.status(status).json({
+    error: message,
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+  });
+});
+
 // Prevent Jest from auto-starting server
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, '0.0.0.0', () => {
