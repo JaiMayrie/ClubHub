@@ -28,6 +28,7 @@ exports.submitJoinRequest = async (req, res) => {
       return res.status(404).json({ error: 'Club not found' });
     }
 
+
     // Check if user is already a member
     const membershipCheck = await db.query(
       'SELECT id FROM memberships WHERE user_id = $1 AND club_id = $2',
@@ -93,7 +94,9 @@ exports.getClubJoinRequests = async (req, res) => {
     );
 
     if (clubCheck.rows.length === 0) {
-      return res.status(404).json({ error: 'Club not found' });
+      return res.status(404).json({
+        error: `Club with ID ${id} not found`,
+      });
     }
 
     if (clubCheck.rows[0].admin_id !== userId) {
@@ -207,7 +210,7 @@ exports.updateJoinRequestStatus = async (req, res) => {
     }
 
     // Begin transaction
-    const client = await db.pool.getConnection();
+    const client = await db.pool.connect();
     
     try {
       await client.query('BEGIN');

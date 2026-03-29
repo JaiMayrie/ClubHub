@@ -20,6 +20,13 @@ if (process.env.NODE_ENV !== 'test' && !process.env.JWT_SECRET) {
 app.use(cors());
 app.use(express.json());
 
+app.use((err, req, res, next) => {
+  if (err.type === 'entity.parse.failed') {
+    return res.status(400).json({ error: 'Invalid JSON in request body' });
+  }
+  next(err);
+});
+
 // Health check route (endpoint for monitoring tools)
 app.get("/api/health", (req, res) => {
   res.json({

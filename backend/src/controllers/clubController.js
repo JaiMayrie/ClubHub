@@ -186,7 +186,7 @@ exports.createClub = async (req, res) => {
     // ========== VALIDATION 2: Name Length ==========
     if (name.length < 3 || name.length > 150) {
       return res.status(400).json({ 
-        error: 'Club name must be between 3 and 150 characters' 
+        error: `Club name must be between 3 and 150 characters (got ${name.length})`,
       });
     }
     
