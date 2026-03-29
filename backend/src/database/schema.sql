@@ -79,3 +79,20 @@ CREATE TABLE join_requests (
 -- Index for faster admin queries (get all requests for a club)
 CREATE INDEX idx_join_requests_club_id ON join_requests(club_id);
 CREATE INDEX idx_join_requests_status ON join_requests(status);
+
+-- ============================================
+-- PERFORMANCE INDEXES (Sprint 4 - US-405)
+-- ============================================
+
+-- Full-text search index for club name and description (speeds up ILIKE queries)
+CREATE INDEX idx_clubs_name_search ON clubs USING gin(to_tsvector('english', name));
+CREATE INDEX idx_clubs_description_search ON clubs USING gin(to_tsvector('english', description));
+
+-- Index for join_requests by user (speeds up my-requests endpoint)
+CREATE INDEX idx_join_requests_user_id ON join_requests(user_id);
+
+-- Index for pending requests specifically (most common query pattern)
+CREATE INDEX idx_join_requests_pending ON join_requests(club_id, status) WHERE status = 'pending';
+
+-- Index for memberships by user (speeds up my-memberships endpoint)
+CREATE INDEX idx_memberships_user_id ON memberships(user_id);
