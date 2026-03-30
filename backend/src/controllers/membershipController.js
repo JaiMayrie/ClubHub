@@ -61,7 +61,7 @@ exports.leaveClub = async (req, res) => {
     }
 
     // Begin transaction
-    const client = await db.pool.getConnection();
+    const client = await db.pool.connect();
     
     try {
       await client.query('BEGIN');
