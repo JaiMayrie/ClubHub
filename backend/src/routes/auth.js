@@ -15,5 +15,6 @@ router.post("/login", authController.login);
 
 // Protected route for current authenticated user's profile
 router.get("/me", authenticate, authController.getMe);
+router.get('/profile', authenticate, authController.getProfile);
 
 module.exports = router;
