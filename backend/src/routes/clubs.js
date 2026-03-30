@@ -22,4 +22,7 @@ router.post('/', authenticate, clubController.createClub);
 
 router.patch('/:id', authenticate, clubController.updateClub);
 
+// Admin-only route to remove a member from the club
+router.delete('/:id/members/:userId', authenticate, memberController.removeClubMember);
+
 module.exports = router;

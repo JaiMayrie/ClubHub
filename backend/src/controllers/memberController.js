@@ -50,3 +50,80 @@ exports.getClubMembers = async (req, res) => {
     return res.status(500).json({ error: 'Failed to fetch members' });
   }
 };
+
+/**
+ * Remove a member from a club (admin only)
+ *
+ * @route   DELETE /api/clubs/:id/members/:userId
+ * @access  Private (club admin only)
+ */
+exports.removeClubMember = async (req, res) => {
+  try {
+    const { id, userId: targetUserId } = req.params;
+    const adminId = req.userId;
+
+    // Verify club exists and requester is the admin
+    const clubCheck = await db.query(
+      'SELECT admin_id FROM clubs WHERE id = $1',
+      [id]
+    );
+
+    if (clubCheck.rows.length === 0) {
+      return res.status(404).json({ error: 'Club not found' });
+    }
+
+    if (clubCheck.rows[0].admin_id !== adminId) {
+      return res.status(403).json({
+        error: 'Only the club admin can remove members',
+      });
+    }
+
+    // Prevent admin from removing themselves
+    if (parseInt(targetUserId) === adminId) {
+      return res.status(400).json({
+        error: 'Club admin cannot remove themselves from the club',
+      });
+    }
+
+    // Check membership exists
+    const memberCheck = await db.query(
+      'SELECT id FROM memberships WHERE user_id = $1 AND club_id = $2',
+      [targetUserId, id]
+    );
+
+    if (memberCheck.rows.length === 0) {
+      return res.status(404).json({
+        error: 'This user is not a member of the club',
+      });
+    }
+
+    // Remove membership and decrement count in a transaction
+    const client = await db.pool.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      await client.query(
+        'DELETE FROM memberships WHERE user_id = $1 AND club_id = $2',
+        [targetUserId, id]
+      );
+
+      await client.query(
+        'UPDATE clubs SET member_count = GREATEST(member_count - 1, 0) WHERE id = $1',
+        [id]
+      );
+
+      await client.query('COMMIT');
+
+      return res.json({ message: 'Member removed successfully' });
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('Error removing member:', error);
+    return res.status(500).json({ error: 'Failed to remove member' });
+  }
+};
