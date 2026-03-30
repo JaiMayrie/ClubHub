@@ -17,6 +17,8 @@ router.post("/login", authController.login);
 router.get("/me", authenticate, authController.getMe);
 router.get('/profile', authenticate, authController.getProfile);
 
+// Additional protected routes for updating profile and changing password
 router.patch('/profile', authenticate, authController.updateProfile);
+router.patch('/password', authenticate, authController.changePassword);
 
 module.exports = router;
