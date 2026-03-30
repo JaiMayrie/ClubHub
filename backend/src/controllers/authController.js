@@ -167,3 +167,39 @@ exports.getProfile = async (req, res) => {
     return res.status(500).json({ error: 'Server error' });
   }
 };
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'Name is required' });
+    }
+
+    if (name.trim().length < 2 || name.trim().length > 100) {
+      return res.status(400).json({
+        error: 'Name must be between 2 and 100 characters',
+      });
+    }
+
+    const result = await db.query(
+      `UPDATE users 
+       SET name = $1 
+       WHERE id = $2 
+       RETURNING id, name, email, role, created_at`,
+      [name.trim(), req.userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    return res.json({
+      message: 'Profile updated successfully',
+      user: result.rows[0],
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    return res.status(500).json({ error: 'Server error' });
+  }
+};
