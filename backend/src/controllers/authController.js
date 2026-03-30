@@ -149,3 +149,21 @@ exports.getMe = async (req, res) => {
     return res.status(500).json({ error: "Server error" });
   }
 };
+
+exports.getProfile = async (req, res) => {
+  try {
+    const result = await db.query(
+      'SELECT id, name, email, role, created_at FROM users WHERE id = $1',
+      [req.userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    return res.json({ user: result.rows[0] });
+  } catch (error) {
+    console.error('Get profile error:', error);
+    return res.status(500).json({ error: 'Server error' });
+  }
+};
