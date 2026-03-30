@@ -248,3 +248,21 @@ curl "http://localhost:5000/api/clubs?category=Sports&search=basketball"
 1. Create a feature branch
 2. Make your changes
 3. Submit a pull request
+
+### User Profile
+- `GET /api/auth/profile` - Get current user profile (name, email, role, join date)
+- `PATCH /api/auth/profile` - Update profile name
+- `PATCH /api/auth/password` - Change password (requires current password)
+
+### Club Members 
+- `GET /api/clubs/:id/members` - Get all members of a club (admin only)
+- `DELETE /api/clubs/:id/members/:userId` - Remove a member from club (admin only)
+
+### Memberships
+- `GET /api/memberships/my-memberships` - Get current user's club memberships
+- `DELETE /api/memberships/:clubId` - Leave a club
+
+### Join Requests
+- `POST /api/join-requests` - Submit a join request
+- `GET /api/join-requests/my-requests` - Get current user's requests
+- `PATCH /api/join-requests/:id` - Approve or reject a request (admin only)
