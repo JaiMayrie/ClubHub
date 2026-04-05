@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import NavHeader from "../components/NavHeader";
 import { clubsAPI } from "../services/api";
+import { ClubCardSkeleton } from '../components/LoadingSkeleton';
 
 function BrowseClubsPage() {
   const [clubs, setClubs] = useState([]);
@@ -88,7 +89,9 @@ function BrowseClubsPage() {
         </div>
 
         {loading ? (
-          <p className="text-center py-12 text-gray-600">Loading clubs...</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map(i => <ClubCardSkeleton key={i} />)}
+          </div>
         ) : clubs.length === 0 ? (
           <p className="text-center py-12 text-gray-600">
             No clubs found matching your criteria.
