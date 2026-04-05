@@ -39,6 +39,21 @@ export const authAPI = {
     const response = await api.get('/auth/me');
     return response.data;
   },
+
+  getProfile: async () => {
+    const response = await api.get('/auth/profile');
+    return response.data;
+  },
+
+  updateProfile: async (data) => {
+    const response = await api.patch('/auth/profile', data);
+    return response.data;
+  },
+  
+  changePassword: async (data) => {
+    const response = await api.patch('/auth/password', data);
+    return response.data;
+  },
 };
 
 // ============================================
