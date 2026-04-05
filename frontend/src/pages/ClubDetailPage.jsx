@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import NavHeader from "../components/NavHeader";
-import { clubsAPI, joinRequestsAPI } from "../services/api";
+import { clubsAPI, joinRequestsAPI, membershipsAPI } from "../services/api";
 
 function ClubDetailPage() {
   const { id } = useParams();
@@ -15,6 +15,7 @@ function ClubDetailPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [userStatus, setUserStatus] = useState(null);
 
   const fetchClubDetails = useCallback(async () => {
     try {
@@ -32,24 +33,54 @@ function ClubDetailPage() {
     fetchClubDetails();
   }, [fetchClubDetails]);
 
+  useEffect(() => {
+    const checkUserStatus = async () => {
+      if (!user) return;
+      try {
+        const [memberships, requests] = await Promise.all([
+          membershipsAPI.getMy(),
+          joinRequestsAPI.getMy(),
+        ]);
+        const isMember = memberships.memberships.some(
+          (m) => m.club_id === parseInt(id)
+        );
+        const hasPending = requests.requests.some(
+          (r) => r.club_id === parseInt(id) && r.status === "pending"
+        );
+        if (isMember) {
+          setUserStatus("member");
+        } else if (hasPending) {
+          setUserStatus("pending");
+        }
+      } catch (err) {
+        console.error("Error checking user status:", err);
+      }
+    };
+    checkUserStatus();
+  }, [id, user]);
+
   const handleJoinRequest = async (e) => {
     e.preventDefault();
-
     if (!user) {
       navigate("/login");
       return;
     }
-
     setSubmitting(true);
     setError("");
     setSuccess("");
-
     try {
       await joinRequestsAPI.submit(id, joinMessage);
-      setSuccess("Join request submitted successfully!");
+      setUserStatus("pending");
       setJoinMessage("");
-    } catch (error) {
-      setError(error.response?.data?.error || "Failed to submit join request");
+    } catch (err) {
+      const msg = err.response?.data?.error || "Failed to submit join request";
+      if (msg.includes("already a member")) {
+        setUserStatus("member");
+      } else if (msg.includes("already have a pending")) {
+        setUserStatus("pending");
+      } else {
+        setError(msg);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -80,7 +111,6 @@ function ClubDetailPage() {
     <div className="min-h-screen bg-gray-50">
       <NavHeader />
 
-      {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <Link to="/clubs" className="text-purdue-gold hover:underline">
@@ -89,7 +119,7 @@ function ClubDetailPage() {
         </div>
 
         <div className="bg-white border-2 border-gray-200 rounded-lg p-8">
-          {/* Club Header */}
+
           <div className="mb-6">
             <h1 className="text-4xl font-bold mb-3">{club.name}</h1>
             <div className="flex items-center gap-3">
@@ -102,7 +132,6 @@ function ClubDetailPage() {
             </div>
           </div>
 
-          {/* Club Details */}
           <div className="space-y-6">
             <div>
               <h2 className="text-xl font-bold mb-2">About</h2>
@@ -136,49 +165,63 @@ function ClubDetailPage() {
             )}
           </div>
 
-          {/* Join Request Form */}
           {user && (
             <div className="mt-8 pt-8 border-t-2 border-gray-200">
-              <h2 className="text-2xl font-bold mb-4">Request to Join</h2>
+              <h2 className="text-2xl font-bold mb-4">
+                {userStatus === "member" ? "You are a member" : "Request to Join"}
+              </h2>
 
-              {error && (
-                <div className="bg-red-50 border-2 border-red-200 text-red-800 px-4 py-3 rounded mb-4">
-                  {error}
+              {userStatus === "member" && (
+                <div className="bg-green-50 border-2 border-green-200 text-green-800 px-4 py-3 rounded">
+                  You are already a member of this club.
                 </div>
               )}
 
-              {success && (
-                <div className="bg-green-50 border-2 border-green-200 text-green-800 px-4 py-3 rounded mb-4">
-                  {success}
+              {userStatus === "pending" && (
+                <div className="bg-yellow-50 border-2 border-yellow-200 text-yellow-800 px-4 py-3 rounded">
+                  Your join request is pending approval.
                 </div>
               )}
 
-              <form onSubmit={handleJoinRequest} className="space-y-4">
-                <div>
-                  <label
-                    htmlFor="message"
-                    className="block text-sm font-semibold text-gray-700 mb-2"
-                  >
-                    Message to Club Admin (Optional)
-                  </label>
-                  <textarea
-                    id="message"
-                    rows="4"
-                    placeholder="Tell us why you'd like to join..."
-                    value={joinMessage}
-                    onChange={(e) => setJoinMessage(e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purdue-gold focus:outline-none"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="bg-purdue-gold text-black px-8 py-3 rounded-lg font-bold hover:bg-purdue-gold-dark transition-colors disabled:opacity-50"
-                >
-                  {submitting ? "Submitting..." : "Submit Join Request"}
-                </button>
-              </form>
+              {!userStatus && (
+                <>
+                  {error && (
+                    <div className="bg-red-50 border-2 border-red-200 text-red-800 px-4 py-3 rounded mb-4">
+                      {error}
+                    </div>
+                  )}
+                  {success && (
+                    <div className="bg-green-50 border-2 border-green-200 text-green-800 px-4 py-3 rounded mb-4">
+                      {success}
+                    </div>
+                  )}
+                  <form onSubmit={handleJoinRequest} className="space-y-4">
+                    <div>
+                      <label
+                        htmlFor="message"
+                        className="block text-sm font-semibold text-gray-700 mb-2"
+                      >
+                        Message to Club Admin (Optional)
+                      </label>
+                      <textarea
+                        id="message"
+                        rows="4"
+                        placeholder="Tell us why you'd like to join..."
+                        value={joinMessage}
+                        onChange={(e) => setJoinMessage(e.target.value)}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purdue-gold focus:outline-none"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="bg-purdue-gold text-black px-8 py-3 rounded-lg font-bold hover:bg-purdue-gold-dark transition-colors disabled:opacity-50"
+                    >
+                      {submitting ? "Submitting..." : "Submit Join Request"}
+                    </button>
+                  </form>
+                </>
+              )}
             </div>
           )}
 
@@ -195,6 +238,7 @@ function ClubDetailPage() {
               </p>
             </div>
           )}
+
         </div>
       </main>
     </div>
