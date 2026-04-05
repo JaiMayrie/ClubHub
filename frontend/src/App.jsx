@@ -6,8 +6,9 @@ import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
 import BrowseClubsPage from "./pages/BrowseClubsPage";
 import ClubDetailPage from "./pages/ClubDetailPage";
-import CreateClubPage from "./pages/CreateClubPage"; 
-import EditClubPage from './pages/EditClubPage';
+import CreateClubPage from "./pages/CreateClubPage";
+import EditClubPage from "./pages/EditClubPage";
+import ClubMembersPage from "./pages/ClubMembersPage";
 
 function App() {
   return (
@@ -15,7 +16,7 @@ function App() {
       {/* Public Routes */}
       <Route path="/" element={<HomePage />} />
       <Route path="/clubs" element={<BrowseClubsPage />} />
-      
+
       {/* Auth Routes (redirect to dashboard if already logged in) */}
       <Route
         element={<ProtectedRoute requireAuth={false} redirectTo="/dashboard" />}
@@ -27,10 +28,12 @@ function App() {
       {/* Protected Routes */}
       <Route element={<ProtectedRoute requireAuth redirectTo="/login" />}>
         <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/clubs/create" element={<CreateClubPage />} />  
+        <Route path="/clubs/create" element={<CreateClubPage />} />
         <Route path="/clubs/:id/edit" element={<EditClubPage />} />
+        <Route path="/clubs/:id/members" element={<ClubMembersPage />} />
       </Route>
 
+      {/* Dynamic club detail — must come last */}
       <Route path="/clubs/:id" element={<ClubDetailPage />} />
     </Routes>
   );
