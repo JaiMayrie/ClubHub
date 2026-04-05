@@ -9,7 +9,8 @@ import ClubDetailPage from "./pages/ClubDetailPage";
 import CreateClubPage from "./pages/CreateClubPage";
 import EditClubPage from "./pages/EditClubPage";
 import ClubMembersPage from "./pages/ClubMembersPage";
-import ProfilePage from './pages/ProfilePage';
+import ProfilePage from "./pages/ProfilePage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
   return (
@@ -35,8 +36,9 @@ function App() {
         <Route path="/clubs/:id/members" element={<ClubMembersPage />} />
       </Route>
 
-      {/* Dynamic club detail — must come last */}
       <Route path="/clubs/:id" element={<ClubDetailPage />} />
+
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }
