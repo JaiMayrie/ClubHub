@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import NavHeader from "../components/NavHeader";
 import { clubsAPI } from "../services/api";
-import { ClubCardSkeleton } from '../components/LoadingSkeleton';
+import { ClubCardSkeleton } from "../components/LoadingSkeleton";
 
 function BrowseClubsPage() {
   const [clubs, setClubs] = useState([]);
@@ -44,7 +44,6 @@ function BrowseClubsPage() {
     <div className="min-h-screen bg-gray-50">
       <NavHeader />
 
-      {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <h1 className="text-4xl font-bold mb-8">All Clubs</h1>
 
@@ -54,16 +53,15 @@ function BrowseClubsPage() {
             Search & Filter Bar
           </h3>
 
-          {/* Search Input */}
           <input
             type="text"
             placeholder="Search clubs..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            aria-label="Search clubs by name or description"
             className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg mb-4 focus:border-purdue-gold focus:outline-none"
           />
 
-          {/* Category Filter */}
           <select
             value={category || "All Categories"}
             onChange={(e) =>
@@ -71,6 +69,7 @@ function BrowseClubsPage() {
                 e.target.value === "All Categories" ? "" : e.target.value,
               )
             }
+            aria-label="Filter by category"
             className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purdue-gold focus:outline-none"
           >
             {categories.map((cat) => (
@@ -90,7 +89,9 @@ function BrowseClubsPage() {
 
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map(i => <ClubCardSkeleton key={i} />)}
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <ClubCardSkeleton key={i} />
+            ))}
           </div>
         ) : clubs.length === 0 ? (
           <p className="text-center py-12 text-gray-600">
