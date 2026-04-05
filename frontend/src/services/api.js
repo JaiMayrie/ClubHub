@@ -127,4 +127,15 @@ export const membershipsAPI = {
   },
 };
 
+export const membersAPI = {
+  getClubMembers: async (clubId) => {
+    const response = await api.get(`/clubs/${clubId}/members`);
+    return response.data;
+  },
+  removeMember: async (clubId, userId) => {
+    const response = await api.delete(`/clubs/${clubId}/members/${userId}`);
+    return response.data;
+  },
+};
+
 export default api;
