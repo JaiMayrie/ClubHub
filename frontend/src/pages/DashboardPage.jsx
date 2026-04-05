@@ -152,6 +152,52 @@ function DashboardPage() {
   );
 }
 
+function RequestCard({ request, onAction }) {
+  const [processing, setProcessing] = useState(false);
+
+  const handleAction = async (status) => {
+    setProcessing(true);
+    try {
+      await onAction(request.id, status);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  return (
+    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+      <div className="flex justify-between items-start gap-4">
+        <div className="min-w-0">
+          <p className="font-semibold truncate">{request.user_name}</p>
+          <p className="text-sm text-gray-600 truncate">{request.user_email}</p>
+          {request.message && (
+            <p className="text-sm text-gray-700 mt-2 italic">"{request.message}"</p>
+          )}
+          <p className="text-xs text-gray-400 mt-1">
+            {new Date(request.created_at).toLocaleDateString()}
+          </p>
+        </div>
+        <div className="flex gap-2 flex-shrink-0">
+          <button
+            onClick={() => handleAction('approved')}
+            disabled={processing}
+            className="bg-green-500 text-white px-3 py-1.5 rounded text-sm font-semibold hover:bg-green-600 disabled:opacity-50 transition-colors"
+          >
+            Approve
+          </button>
+          <button
+            onClick={() => handleAction('rejected')}
+            disabled={processing}
+            className="bg-red-500 text-white px-3 py-1.5 rounded text-sm font-semibold hover:bg-red-600 disabled:opacity-50 transition-colors"
+          >
+            Reject
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Admin Club Card Component
 function AdminClubCard({ club }) {
   const [requests, setRequests] = useState([]);
