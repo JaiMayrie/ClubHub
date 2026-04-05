@@ -9,6 +9,7 @@ import ClubDetailPage from "./pages/ClubDetailPage";
 import CreateClubPage from "./pages/CreateClubPage";
 import EditClubPage from "./pages/EditClubPage";
 import ClubMembersPage from "./pages/ClubMembersPage";
+import ProfilePage from './pages/ProfilePage';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
       {/* Protected Routes */}
       <Route element={<ProtectedRoute requireAuth redirectTo="/login" />}>
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
         <Route path="/clubs/create" element={<CreateClubPage />} />
         <Route path="/clubs/:id/edit" element={<EditClubPage />} />
         <Route path="/clubs/:id/members" element={<ClubMembersPage />} />

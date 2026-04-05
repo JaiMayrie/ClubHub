@@ -5,7 +5,6 @@ function NavHeader({ backTo, backLabel = "← Back to Home" }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  // Navigate a user back to home page on logout and clear auth state
   const handleLogout = () => {
     logout();
     navigate("/");
@@ -42,6 +41,12 @@ function NavHeader({ backTo, backLabel = "← Back to Home" }) {
                   className="text-white hover:text-purdue-gold transition-colors font-medium"
                 >
                   My Dashboard
+                </Link>
+                <Link
+                  to="/profile"
+                  className="text-white hover:text-purdue-gold transition-colors font-medium"
+                >
+                  Profile
                 </Link>
                 <button
                   onClick={handleLogout}
