@@ -13,6 +13,10 @@ function DashboardPage() {
 
   const isAdmin = user?.role === "admin";
 
+  const handleLeaveClub = useCallback((clubId) => {
+    setMyMemberships(prev => prev.filter(m => m.club_id !== clubId));
+  }, []);
+
   const fetchDashboardData = useCallback(async () => {
     try {
       if (isAdmin) {
@@ -120,6 +124,7 @@ function DashboardPage() {
                       <StudentClubCard
                         key={membership.id}
                         membership={membership}
+                        onLeave={handleLeaveClub}
                       />
                     ))}
                   </div>
@@ -290,19 +295,68 @@ function AdminClubCard({ club }) {
 }
 
 // Student Club Card Component
-function StudentClubCard({ membership }) {
+function StudentClubCard({ membership, onLeave }) {
+  const [leaving, setLeaving] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const handleLeave = async () => {
+    setLeaving(true);
+    try {
+      await membershipsAPI.leave(membership.club_id);
+      onLeave(membership.club_id);
+    } catch (err) {
+      alert('Failed to leave club. Please try again.');
+    } finally {
+      setLeaving(false);
+      setShowConfirm(false);
+    }
+  };
+
   return (
     <div className="bg-white border-2 border-gray-200 rounded-lg p-6">
-      <h3 className="text-2xl font-bold mb-2">{membership.club_name}</h3>
-      <p className="text-gray-600 mb-4">
-        Member since {new Date(membership.joined_at).toLocaleDateString()}
-      </p>
-      <Link
-        to={`/clubs/${membership.club_id}`}
-        className="bg-gray-200 text-black px-6 py-2 rounded font-semibold hover:bg-gray-300 transition-colors inline-block"
-      >
-        View Club
-      </Link>
+      <div className="flex justify-between items-start">
+        <div>
+          <h3 className="text-xl font-bold mb-1">{membership.club_name}</h3>
+          <span className="bg-purdue-gold text-black px-2 py-0.5 rounded text-sm font-semibold">
+            {membership.category}
+          </span>
+          <p className="text-gray-600 text-sm mt-2">
+            Member since {new Date(membership.joined_at).toLocaleDateString()}
+          </p>
+        </div>
+        <div className="flex flex-col gap-2 items-end">
+          <Link
+            to={`/clubs/${membership.club_id}`}
+            className="bg-purdue-gold text-black px-4 py-2 rounded font-semibold hover:bg-purdue-gold-dark transition-colors text-sm"
+          >
+            View Club
+          </Link>
+          {!showConfirm ? (
+            <button
+              onClick={() => setShowConfirm(true)}
+              className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors"
+            >
+              Leave club
+            </button>
+          ) : (
+            <div className="flex gap-2">
+              <button
+                onClick={handleLeave}
+                disabled={leaving}
+                className="bg-red-500 text-white px-3 py-1 rounded text-sm font-semibold hover:bg-red-600 disabled:opacity-50"
+              >
+                {leaving ? 'Leaving...' : 'Confirm'}
+              </button>
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="bg-gray-200 text-black px-3 py-1 rounded text-sm font-semibold hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -310,16 +364,17 @@ function StudentClubCard({ membership }) {
 // Pending Request Card Component
 function PendingRequestCard({ request }) {
   return (
-    <div className="bg-white border-2 border-gray-200 rounded-lg p-6">
-      <h3 className="text-2xl font-bold mb-3">{request.club_name}</h3>
-      <div className="flex items-center gap-3">
-        <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded font-semibold text-sm">
-          Pending
-        </span>
-        <span className="text-gray-600">
-          Requested on {new Date(request.created_at).toLocaleDateString()}
-        </span>
+    <div className="bg-white border-2 border-gray-200 rounded-lg p-5 flex justify-between items-center">
+      <div>
+        <h3 className="text-lg font-bold">{request.club_name}</h3>
+        <p className="text-sm text-gray-500 mt-1">
+          {request.club_category} •{' '}
+          Requested {new Date(request.created_at).toLocaleDateString()}
+        </p>
       </div>
+      <span className="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full text-sm font-semibold flex-shrink-0">
+        Pending
+      </span>
     </div>
   );
 }
