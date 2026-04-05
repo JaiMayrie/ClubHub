@@ -163,85 +163,82 @@ function AdminClubCard({ club }) {
       const data = await joinRequestsAPI.getForClub(club.id);
       setRequests(data.requests);
     } catch (error) {
-      console.error("Error fetching requests:", error);
+      console.error('Error fetching requests:', error);
     } finally {
       setLoadingRequests(false);
     }
   }, [club.id]);
 
-  useEffect(() => {
-    fetchRequests();
-  }, [fetchRequests]);
+  useEffect(() => { fetchRequests(); }, [fetchRequests]);
 
   const handleRequestAction = async (requestId, status) => {
     try {
       await joinRequestsAPI.updateStatus(requestId, status);
-      // Refresh requests
-      fetchRequests();
+      setRequests(prev => prev.filter(r => r.id !== requestId)); 
     } catch (error) {
-      console.error("Error updating request:", error);
-      alert("Failed to update request");
+      console.error('Error updating request:', error);
+      alert('Failed to update request. Please try again.');
     }
   };
 
   return (
     <div className="bg-white border-2 border-gray-200 rounded-lg p-6">
-      <h3 className="text-2xl font-bold mb-2">{club.name}</h3>
-      <p className="text-gray-600 mb-4">
-        {club.member_count} members • {loadingRequests ? "…" : requests.length}{" "}
-        pending requests
-      </p>
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <h3 className="text-2xl font-bold">{club.name}</h3>
+          <p className="text-gray-600 mt-1">{club.member_count} members</p>
+        </div>
+        {requests.length > 0 && (
+          <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">
+            {requests.length} pending
+          </span>
+        )}
+      </div>
 
-      <div className="flex gap-3 mb-4">
+      <div className="flex gap-3 mb-6">
         <Link
           to={`/clubs/${club.id}`}
-          className="bg-purdue-gold text-black px-6 py-2 rounded font-semibold hover:bg-purdue-gold-dark transition-colors"
+          className="bg-purdue-gold text-black px-4 py-2 rounded font-semibold hover:bg-purdue-gold-dark transition-colors"
         >
-          Manage Club
+          View Club
+        </Link>
+        <Link
+          to={`/clubs/${club.id}/edit`}
+          className="bg-gray-200 text-black px-4 py-2 rounded font-semibold hover:bg-gray-300 transition-colors"
+        >
+          Edit Club
+        </Link>
+        <Link
+          to={`/clubs/${club.id}/members`}
+          className="bg-gray-200 text-black px-4 py-2 rounded font-semibold hover:bg-gray-300 transition-colors"
+        >
+          Members
         </Link>
       </div>
 
-      {/* Pending Requests */}
-      {requests.length > 0 && (
-        <div className="mt-4 pt-4 border-t-2 border-gray-200">
-          <h4 className="font-bold mb-3">Pending Join Requests:</h4>
-          <div className="space-y-3">
-            {requests.map((request) => (
-              <div key={request.id} className="bg-gray-50 p-3 rounded">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-semibold">{request.user_name}</p>
-                    <p className="text-sm text-gray-600">
-                      {request.user_email}
-                    </p>
-                    {request.message && (
-                      <p className="text-sm mt-1 italic">"{request.message}"</p>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() =>
-                        handleRequestAction(request.id, "approved")
-                      }
-                      className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600"
-                    >
-                      Approve
-                    </button>
-                    <button
-                      onClick={() =>
-                        handleRequestAction(request.id, "rejected")
-                      }
-                      className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
-                    >
-                      Reject
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+      <div className="border-t-2 border-gray-100 pt-4">
+        <h4 className="font-bold text-gray-700 uppercase text-sm mb-3">
+          Pending Join Requests
+        </h4>
+
+        {loadingRequests && (
+          <p className="text-gray-500 text-sm">Loading requests...</p>
+        )}
+
+        {!loadingRequests && requests.length === 0 && (
+          <p className="text-gray-500 text-sm">No pending requests.</p>
+        )}
+
+        <div className="space-y-3">
+          {requests.map((request) => (
+            <RequestCard
+              key={request.id}
+              request={request}
+              onAction={handleRequestAction}
+            />
+          ))}
         </div>
-      )}
+      </div>
     </div>
   );
 }
