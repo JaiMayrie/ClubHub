@@ -7,6 +7,8 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const db = require("../db");
+const fs = require("fs");
+const path = require("path");
 
 // Generates a JWT token containing userId and role
 // Token expires in 7 days
@@ -153,54 +155,162 @@ exports.getMe = async (req, res) => {
 exports.getProfile = async (req, res) => {
   try {
     const result = await db.query(
-      'SELECT id, name, email, role, created_at FROM users WHERE id = $1',
-      [req.userId]
+      "SELECT id, name, email, role, bio, major, year, avatar_url, created_at FROM users WHERE id = $1",
+      [req.userId],
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
 
     return res.json({ user: result.rows[0] });
   } catch (error) {
-    console.error('Get profile error:', error);
-    return res.status(500).json({ error: 'Server error' });
+    console.error("Get profile error:", error);
+    return res.status(500).json({ error: "Server error" });
+  }
+};
+
+exports.getPublicProfile = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const userResult = await db.query(
+      "SELECT id, name, bio, major, year, avatar_url, created_at FROM users WHERE id = $1",
+      [id],
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const clubsResult = await db.query(
+      `SELECT clubs.id, clubs.name AS club_name, clubs.category
+       FROM memberships
+       JOIN clubs ON memberships.club_id = clubs.id
+       WHERE memberships.user_id = $1
+       ORDER BY clubs.name`,
+      [id],
+    );
+
+    return res.json({ user: userResult.rows[0], clubs: clubsResult.rows });
+  } catch (error) {
+    console.error("Get public profile error:", error);
+    return res.status(500).json({ error: "Server error" });
   }
 };
 
 exports.updateProfile = async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, bio, major, year } = req.body;
 
-    if (!name || !name.trim()) {
-      return res.status(400).json({ error: 'Name is required' });
+    if (name !== undefined) {
+      if (!name || !name.trim()) {
+        return res.status(400).json({ error: "Name is required" });
+      }
+      if (name.trim().length < 2 || name.trim().length > 100) {
+        return res.status(400).json({
+          error: "Name must be between 2 and 100 characters",
+        });
+      }
     }
 
-    if (name.trim().length < 2 || name.trim().length > 100) {
-      return res.status(400).json({
-        error: 'Name must be between 2 and 100 characters',
-      });
+    if (bio !== undefined && bio.length > 500) {
+      return res
+        .status(400)
+        .json({ error: "Bio must be 500 characters or fewer" });
+    }
+
+    if (major !== undefined && major.length > 100) {
+      return res
+        .status(400)
+        .json({ error: "Major must be 100 characters or fewer" });
+    }
+
+    const validYears = [
+      "",
+      "Freshman",
+      "Sophomore",
+      "Junior",
+      "Senior",
+      "Graduate",
+      "Other",
+    ];
+    if (year !== undefined && !validYears.includes(year)) {
+      return res.status(400).json({ error: "Invalid year value" });
     }
 
     const result = await db.query(
-      `UPDATE users 
-       SET name = $1 
-       WHERE id = $2 
-       RETURNING id, name, email, role, created_at`,
-      [name.trim(), req.userId]
+      `UPDATE users
+       SET name  = COALESCE($1, name),
+           bio   = COALESCE($2, bio),
+           major = COALESCE($3, major),
+           year  = COALESCE($4, year)
+       WHERE id = $5
+       RETURNING id, name, email, role, bio, major, year, avatar_url, created_at`,
+      [
+        name !== undefined ? name.trim() : null,
+        bio !== undefined ? bio : null,
+        major !== undefined ? major : null,
+        year !== undefined ? year : null,
+        req.userId,
+      ],
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
 
     return res.json({
-      message: 'Profile updated successfully',
+      message: "Profile updated successfully",
       user: result.rows[0],
     });
   } catch (error) {
-    console.error('Update profile error:', error);
-    return res.status(500).json({ error: 'Server error' });
+    console.error("Update profile error:", error);
+    return res.status(500).json({ error: "Server error" });
+  }
+};
+
+exports.uploadAvatar = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+
+    // Fetch current avatar so we can delete the old file
+    const current = await db.query(
+      "SELECT avatar_url FROM users WHERE id = $1",
+      [req.userId],
+    );
+    const oldUrl = current.rows[0]?.avatar_url;
+
+    const result = await db.query(
+      `UPDATE users SET avatar_url = $1 WHERE id = $2
+       RETURNING id, name, email, role, bio, major, year, avatar_url, created_at`,
+      [avatarUrl, req.userId],
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Delete old avatar file (ignore errors if file is missing)
+    if (oldUrl) {
+      fs.unlink(path.join(__dirname, "../../", oldUrl), () => {});
+    }
+
+    return res.json({
+      message: "Avatar updated successfully",
+      user: result.rows[0],
+    });
+  } catch (error) {
+    // Clean up uploaded file on error
+    if (req.file) {
+      fs.unlink(req.file.path, () => {});
+    }
+    console.error("Upload avatar error:", error);
+    return res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -210,54 +320,54 @@ exports.changePassword = async (req, res) => {
 
     if (!currentPassword || !newPassword) {
       return res.status(400).json({
-        error: 'Current password and new password are required',
+        error: "Current password and new password are required",
       });
     }
 
     if (newPassword.length < 6) {
       return res.status(400).json({
-        error: 'New password must be at least 6 characters',
+        error: "New password must be at least 6 characters",
       });
     }
 
     if (currentPassword === newPassword) {
       return res.status(400).json({
-        error: 'New password must be different from current password',
+        error: "New password must be different from current password",
       });
     }
 
     // Fetch current password hash
     const result = await db.query(
-      'SELECT password_hash FROM users WHERE id = $1',
-      [req.userId]
+      "SELECT password_hash FROM users WHERE id = $1",
+      [req.userId],
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
 
     // Verify current password
     const isValid = await bcrypt.compare(
       currentPassword,
-      result.rows[0].password_hash
+      result.rows[0].password_hash,
     );
 
     if (!isValid) {
-      return res.status(401).json({ error: 'Current password is incorrect' });
+      return res.status(401).json({ error: "Current password is incorrect" });
     }
 
     // Hash and save new password
     const saltRounds = 10;
     const newHash = await bcrypt.hash(newPassword, saltRounds);
 
-    await db.query(
-      'UPDATE users SET password_hash = $1 WHERE id = $2',
-      [newHash, req.userId]
-    );
+    await db.query("UPDATE users SET password_hash = $1 WHERE id = $2", [
+      newHash,
+      req.userId,
+    ]);
 
-    return res.json({ message: 'Password changed successfully' });
+    return res.json({ message: "Password changed successfully" });
   } catch (error) {
-    console.error('Change password error:', error);
-    return res.status(500).json({ error: 'Server error' });
+    console.error("Change password error:", error);
+    return res.status(500).json({ error: "Server error" });
   }
 };

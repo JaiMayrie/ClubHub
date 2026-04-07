@@ -15,6 +15,8 @@ if (!process.env.DB_HOST) {
   process.env.DB_PORT = "5433";
 }
 require("dotenv").config();
+const fs = require("fs");
+const path = require("path");
 const db = require("../../db");
 
 // Bcrypt hash of "Password123!"
@@ -28,124 +30,193 @@ const PASSWORD_HASH =
 const users = [
   // Club admins
   {
+    name: "Admin User",
+    email: "admin@pfw.edu",
+    passwordHash: PASSWORD_HASH,
+    role: "admin",
+    bio: "",
+    major: "",
+    year: "",
+  },
+  {
     name: "Jordan Ellis",
     email: "jellis@pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "admin",
+    bio: "Theatre director and performing arts enthusiast. I believe the stage is where students find their voice.",
+    major: "Theatre",
+    year: "Graduate",
   },
   {
     name: "Maya Thompson",
     email: "mthompson@pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "admin",
+    bio: "Business and finance professional mentoring the next generation of accountants and volleyball players.",
+    major: "Accounting",
+    year: "Graduate",
   },
   {
     name: "Carlos Rivera",
     email: "crivera@pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "admin",
+    bio: "Civil engineering graduate student passionate about infrastructure design and community development.",
+    major: "Civil Engineering",
+    year: "Graduate",
   },
   {
     name: "Amara Osei",
     email: "aosei@pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "admin",
+    bio: "Pre-med advisor and advocate for underrepresented students in healthcare. Proud member of the PFW community.",
+    major: "Biology",
+    year: "Graduate",
   },
   {
     name: "Tyler Nguyen",
     email: "tnguyen@pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "admin",
+    bio: "Actuarial science and mathematics enthusiast. I help students navigate the path to professional exams.",
+    major: "Mathematics",
+    year: "Graduate",
   },
   {
     name: "Priya Patel",
     email: "ppatel@pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "admin",
+    bio: "Biology researcher and content creator. I love connecting science with real-world storytelling.",
+    major: "Biology",
+    year: "Graduate",
   },
   {
     name: "Marcus Johnson",
     email: "mjohnson@pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "admin",
+    bio: "Microbiology and pre-pharmacy graduate advisor. Passionate about bridging health sciences and student success.",
+    major: "Microbiology",
+    year: "Graduate",
   },
   {
     name: "Leah Kowalski",
     email: "lkowalski@pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "admin",
+    bio: "Agriculture and cybersecurity double interest. I believe diverse skill sets drive innovation in every field.",
+    major: "Computer Science",
+    year: "Graduate",
   },
   {
     name: "Daniel Park",
     email: "dpark@pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "admin",
+    bio: "Anthropology and wellness advocate. I explore human culture through fieldwork and daily runs around campus.",
+    major: "Anthropology",
+    year: "Graduate",
   },
   {
     name: "Sofia Reyes",
     email: "sreyes@pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "admin",
+    bio: "Dance instructor and biology honors alumna. Bringing artistic discipline to scientific curiosity every day.",
+    major: "Biology",
+    year: "Graduate",
   },
   {
     name: "Ethan Brooks",
     email: "ebrooks@pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "admin",
+    bio: "Black Student Union leader and Habitat for Humanity builder. Community service is my calling.",
+    major: "Social Work",
+    year: "Graduate",
   },
   {
     name: "Zara Ahmed",
     email: "zahmed@pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "admin",
+    bio: "African Students Organization co-founder and weightlifting enthusiast. Celebrating culture while staying strong.",
+    major: "International Studies",
+    year: "Graduate",
   },
   {
     name: "Noah Carter",
     email: "ncarter@pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "admin",
+    bio: "International student advocate and soccer enthusiast. I help build community for students far from home.",
+    major: "Political Science",
+    year: "Graduate",
   },
   {
     name: "Isabelle Martin",
     email: "imartin@pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "admin",
+    bio: "ASL interpreter and tabletop game designer. I believe in accessible communication and creative play.",
+    major: "Communication Sciences",
+    year: "Graduate",
   },
   {
     name: "James Owusu",
     email: "jowusu@pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "admin",
+    bio: "Mental health advocate, photographer, and MEDLIFE volunteer. I document stories that matter.",
+    major: "Psychology",
+    year: "Graduate",
   },
   {
     name: "Rachel Kim",
     email: "rkim@pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "admin",
+    bio: "Archery competitor and entrepreneurship mentor. Precision and vision go hand in hand.",
+    major: "Business Administration",
+    year: "Graduate",
   },
   {
     name: "Omar Hassan",
     email: "ohassan@pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "admin",
+    bio: "Finance and basketball operations enthusiast. I help students understand markets and master the game.",
+    major: "Finance",
+    year: "Graduate",
   },
   {
     name: "Chloe Bennett",
     email: "cbennett@pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "admin",
+    bio: "Alpha Sigma Alpha sister, public health advocate, and SHRM member. Leadership is a way of life for me.",
+    major: "Public Health",
+    year: "Graduate",
   },
   {
     name: "Lucas Freeman",
     email: "lfreeman@pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "admin",
+    bio: "Esports organizer, graphic designer, and game developer. I turn passion for gaming into professional skills.",
+    major: "Computer Science",
+    year: "Graduate",
   },
   {
     name: "Aisha Williams",
     email: "awilliams@pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "admin",
+    bio: "Muslim Student Association advisor and film studies enthusiast. Storytelling is the bridge between cultures.",
+    major: "Film Studies",
+    year: "Graduate",
   },
   // Student accounts
   {
@@ -153,60 +224,90 @@ const users = [
     email: "storres@student.pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "student",
+    bio: "Junior CS student obsessed with game development and esports. Always down for a late-night coding session.",
+    major: "Computer Science",
+    year: "Junior",
   },
   {
     name: "Mia Chen",
     email: "mchen@student.pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "student",
+    bio: "Pre-med sophomore with a love for biology and yoga. Aspiring to work in pediatrics one day.",
+    major: "Biology",
+    year: "Sophomore",
   },
   {
     name: "Jake Murphy",
     email: "jmurphy@student.pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "student",
+    bio: "Sports management junior and basketball stat head. If there's a game, I'm either playing or analyzing it.",
+    major: "Sports Management",
+    year: "Junior",
   },
   {
     name: "Nia Jackson",
     email: "njackson@student.pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "student",
+    bio: "Social work sophomore and community advocate. Passionate about equity, culture, and uplifting others.",
+    major: "Social Work",
+    year: "Sophomore",
   },
   {
     name: "Leo Fischer",
     email: "lfischer@student.pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "student",
+    bio: "Finance and actuarial science double major. I spend my free time studying for exams and exploring markets.",
+    major: "Finance",
+    year: "Senior",
   },
   {
     name: "Hannah Scott",
     email: "hscott@student.pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "student",
+    bio: "Communication studies junior with a passion for theatre, ASL, and reproductive health advocacy.",
+    major: "Communication Studies",
+    year: "Junior",
   },
   {
     name: "Devin Moore",
     email: "dmoore@student.pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "student",
+    bio: "Cybersecurity sophomore and competitive basketball player. I defend both networks and paint.",
+    major: "Cybersecurity",
+    year: "Sophomore",
   },
   {
     name: "Fatima Ali",
     email: "fali@student.pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "student",
+    bio: "Political science senior from Senegal. Involved in MSA, SGA, and volunteer outreach across Fort Wayne.",
+    major: "Political Science",
+    year: "Senior",
   },
   {
     name: "Ryan Bell",
     email: "rbell@student.pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "student",
+    bio: "Civil and computer engineering junior. I build robots on weekdays and bridges on weekends.",
+    major: "Computer Engineering",
+    year: "Junior",
   },
   {
     name: "Grace Liu",
     email: "gliu@student.pfw.edu",
     passwordHash: PASSWORD_HASH,
     role: "student",
+    bio: "Pre-med senior focused on microbiology and pharmacy. Lab research is my passion outside of campus clubs.",
+    major: "Microbiology",
+    year: "Senior",
   },
 ];
 
@@ -1436,17 +1537,24 @@ const joinRequests = [
 async function seed() {
   console.log("Seeding database...");
 
-  await db.query(
-    "TRUNCATE TABLE join_requests, memberships, clubs, users RESTART IDENTITY CASCADE",
-  );
-  console.log("  Cleared existing data.");
+  const schema = fs.readFileSync(path.join(__dirname, "../schema.sql"), "utf8");
+  await db.query(schema);
+  console.log("  Applied schema (tables dropped and recreated).");
 
   // Insert users and build email → id map
   const userIdByEmail = {};
   for (const user of users) {
     const { rows } = await db.query(
-      "INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, $4) RETURNING id, email",
-      [user.name, user.email, user.passwordHash, user.role],
+      "INSERT INTO users (name, email, password_hash, role, bio, major, year) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, email",
+      [
+        user.name,
+        user.email,
+        user.passwordHash,
+        user.role,
+        user.bio ?? "",
+        user.major ?? "",
+        user.year ?? "",
+      ],
     );
     userIdByEmail[rows[0].email] = rows[0].id;
   }
@@ -1469,13 +1577,19 @@ async function seed() {
       ],
     );
     clubIdByContactEmail[rows[0].contact_email] = rows[0].id;
+
+    // Add the admin as a member of their own club
+    await db.query(
+      "INSERT INTO memberships (user_id, club_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+      [adminId, rows[0].id],
+    );
   }
   console.log(`  Inserted ${clubs.length} clubs.`);
 
   // Insert memberships
   for (const m of memberships) {
     await db.query(
-      "INSERT INTO memberships (user_id, club_id) VALUES ($1, $2)",
+      "INSERT INTO memberships (user_id, club_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
       [userIdByEmail[m.userEmail], clubIdByContactEmail[m.clubContactEmail]],
     );
   }

@@ -1,6 +1,11 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
+export const getAvatarUrl = (avatarUrl) => {
+  if (!avatarUrl) return null;
+  return `${API_URL.replace("/api", "")}${avatarUrl}`;
+};
 
 const api = axios.create({
   baseURL: API_URL,
@@ -9,7 +14,7 @@ const api = axios.create({
 // Request interceptor — attach token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('clubhub_token');
+    const token = localStorage.getItem("clubhub_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -17,7 +22,7 @@ api.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Response interceptor — auto-logout on 401
@@ -25,14 +30,14 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('clubhub_token');
+      localStorage.removeItem("clubhub_token");
       const currentPath = window.location.pathname;
-      if (!['/login', '/register', '/'].includes(currentPath)) {
-        window.location.href = '/login';
+      if (!["/login", "/register", "/"].includes(currentPath)) {
+        window.location.href = "/login";
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 // ============================================
@@ -40,32 +45,46 @@ api.interceptors.response.use(
 // ============================================
 export const authAPI = {
   register: async (userData) => {
-    const response = await api.post('/auth/register', userData);
+    const response = await api.post("/auth/register", userData);
     return response.data;
   },
 
   login: async (credentials) => {
-    const response = await api.post('/auth/login', credentials);
+    const response = await api.post("/auth/login", credentials);
     return response.data;
   },
 
   getMe: async () => {
-    const response = await api.get('/auth/me');
+    const response = await api.get("/auth/me");
     return response.data;
   },
 
   getProfile: async () => {
-    const response = await api.get('/auth/profile');
+    const response = await api.get("/auth/profile");
     return response.data;
   },
 
   updateProfile: async (data) => {
-    const response = await api.patch('/auth/profile', data);
+    const response = await api.patch("/auth/profile", data);
     return response.data;
   },
 
   changePassword: async (data) => {
-    const response = await api.patch('/auth/password', data);
+    const response = await api.patch("/auth/password", data);
+    return response.data;
+  },
+
+  getPublicProfile: async (userId) => {
+    const response = await api.get(`/auth/users/${userId}`);
+    return response.data;
+  },
+
+  uploadAvatar: async (file) => {
+    const formData = new FormData();
+    formData.append("avatar", file);
+    const response = await api.post("/auth/avatar", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return response.data;
   },
 };
@@ -75,7 +94,7 @@ export const authAPI = {
 // ============================================
 export const clubsAPI = {
   getAll: async (params = {}) => {
-    const response = await api.get('/clubs', { params });
+    const response = await api.get("/clubs", { params });
     return response.data;
   },
 
@@ -85,12 +104,12 @@ export const clubsAPI = {
   },
 
   getMyClubs: async () => {
-    const response = await api.get('/clubs/my-clubs');
+    const response = await api.get("/clubs/my-clubs");
     return response.data;
   },
 
   create: async (clubData) => {
-    const response = await api.post('/clubs', clubData);
+    const response = await api.post("/clubs", clubData);
     return response.data;
   },
 
@@ -104,8 +123,8 @@ export const clubsAPI = {
 // JOIN REQUESTS API
 // ============================================
 export const joinRequestsAPI = {
-  submit: async (clubId, message = '') => {
-    const response = await api.post('/join-requests', {
+  submit: async (clubId, message = "") => {
+    const response = await api.post("/join-requests", {
       club_id: clubId,
       message,
     });
@@ -118,7 +137,7 @@ export const joinRequestsAPI = {
   },
 
   getMy: async () => {
-    const response = await api.get('/join-requests/my-requests');
+    const response = await api.get("/join-requests/my-requests");
     return response.data;
   },
 
@@ -135,7 +154,7 @@ export const joinRequestsAPI = {
 // ============================================
 export const membershipsAPI = {
   getMy: async () => {
-    const response = await api.get('/memberships/my-memberships');
+    const response = await api.get("/memberships/my-memberships");
     return response.data;
   },
 

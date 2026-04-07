@@ -1,17 +1,17 @@
 const db = require("../db");
 
 /**
- * Get all members of a club (admin only)
+ * Get all members of a club (admin or club member)
  *
  * @route   GET /api/clubs/:id/members
- * @access  Private (club admin only)
+ * @access  Private (club admin or member)
  */
 exports.getClubMembers = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.userId;
+    const userId = parseInt(req.userId, 10);
 
-    // Verify club exists and user is the admin
+    // Verify club exists
     const clubCheck = await db.query(
       "SELECT id, name, admin_id FROM clubs WHERE id = $1",
       [id],
@@ -21,17 +21,26 @@ exports.getClubMembers = async (req, res) => {
       return res.status(404).json({ error: "Club not found" });
     }
 
-    if (clubCheck.rows[0].admin_id !== userId) {
-      return res.status(403).json({
-        error: "Only the club admin can view the member list",
-      });
+    const isAdmin = clubCheck.rows[0].admin_id === userId;
+
+    // Allow access to admin or any club member
+    if (!isAdmin) {
+      const memberCheck = await db.query(
+        "SELECT 1 FROM memberships WHERE club_id = $1 AND user_id = $2",
+        [id, userId],
+      );
+      if (memberCheck.rows.length === 0) {
+        return res.status(403).json({
+          error: "Only club members can view the member list",
+        });
+      }
     }
 
     const result = await db.query(
       `SELECT 
         users.id,
         users.name,
-        users.email,
+        ${isAdmin ? "users.email," : ""}
         memberships.joined_at
        FROM memberships
        JOIN users ON memberships.user_id = users.id
@@ -44,6 +53,7 @@ exports.getClubMembers = async (req, res) => {
       club_name: clubCheck.rows[0].name,
       member_count: result.rows.length,
       members: result.rows,
+      is_admin: isAdmin,
     });
   } catch (error) {
     console.error("Error fetching club members:", error);

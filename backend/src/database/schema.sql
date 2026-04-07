@@ -17,6 +17,10 @@ CREATE TABLE users (
   email VARCHAR(255) NOT NULL UNIQUE CHECK (email = LOWER(email)),
   password_hash VARCHAR(255) NOT NULL,
   role VARCHAR(20) DEFAULT 'student' CHECK (role IN ('student', 'admin')),
+  bio TEXT DEFAULT '',
+  major VARCHAR(100) DEFAULT '',
+  year VARCHAR(20) DEFAULT '' CHECK (year IN ('', 'Freshman', 'Sophomore', 'Junior', 'Senior', 'Graduate', 'Other')),
+  avatar_url VARCHAR(500) DEFAULT '',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
