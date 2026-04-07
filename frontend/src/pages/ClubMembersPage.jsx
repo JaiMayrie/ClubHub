@@ -76,13 +76,15 @@ function ClubMembersPage() {
                   <th className="text-left px-6 py-3 text-sm font-semibold text-gray-700">
                     Name
                   </th>
-                  <th className="text-left px-6 py-3 text-sm font-semibold text-gray-700">
-                    Email
-                  </th>
+                  {data?.is_admin && (
+                    <th className="text-left px-6 py-3 text-sm font-semibold text-gray-700">
+                      Email
+                    </th>
+                  )}
                   <th className="text-left px-6 py-3 text-sm font-semibold text-gray-700">
                     Joined
                   </th>
-                  <th className="px-6 py-3"></th>
+                  {data?.is_admin && <th className="px-6 py-3"></th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -96,20 +98,24 @@ function ClubMembersPage() {
                         {member.name}
                       </Link>
                     </td>
-                    <td className="px-6 py-4 text-gray-600 text-sm">
-                      {member.email}
-                    </td>
+                    {data?.is_admin && (
+                      <td className="px-6 py-4 text-gray-600 text-sm">
+                        {member.email}
+                      </td>
+                    )}
                     <td className="px-6 py-4 text-gray-600 text-sm">
                       {new Date(member.joined_at).toLocaleDateString()}
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <button
-                        onClick={() => handleRemove(member.id, member.name)}
-                        className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors"
-                      >
-                        Remove
-                      </button>
-                    </td>
+                    {data?.is_admin && (
+                      <td className="px-6 py-4 text-right">
+                        <button
+                          onClick={() => handleRemove(member.id, member.name)}
+                          className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors"
+                        >
+                          Remove
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
