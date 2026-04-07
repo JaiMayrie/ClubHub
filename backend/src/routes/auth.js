@@ -15,10 +15,13 @@ router.post("/login", authController.login);
 
 // Protected route for current authenticated user's profile
 router.get("/me", authenticate, authController.getMe);
-router.get('/profile', authenticate, authController.getProfile);
+router.get("/profile", authenticate, authController.getProfile);
 
 // Additional protected routes for updating profile and changing password
-router.patch('/profile', authenticate, authController.updateProfile);
-router.patch('/password', authenticate, authController.changePassword);
+router.patch("/profile", authenticate, authController.updateProfile);
+router.patch("/password", authenticate, authController.changePassword);
+
+// Public profile — view any user's profile (authenticated)
+router.get("/users/:id", authenticate, authController.getPublicProfile);
 
 module.exports = router;

@@ -1,13 +1,31 @@
-import { useState, useEffect } from 'react';
-import NavHeader from '../components/NavHeader';
-import { authAPI } from '../services/api';
+import { useState, useEffect } from "react";
+import NavHeader from "../components/NavHeader";
+import { authAPI } from "../services/api";
 
 function ProfilePage() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [nameForm, setNameForm] = useState({ name: '', editing: false, saving: false, error: '', success: '' });
+  const [nameForm, setNameForm] = useState({
+    name: "",
+    editing: false,
+    saving: false,
+    error: "",
+    success: "",
+  });
+  const [detailsForm, setDetailsForm] = useState({
+    bio: "",
+    major: "",
+    year: "",
+    saving: false,
+    error: "",
+    success: "",
+  });
   const [pwForm, setPwForm] = useState({
-    currentPassword: '', newPassword: '', saving: false, error: '', success: '',
+    currentPassword: "",
+    newPassword: "",
+    saving: false,
+    error: "",
+    success: "",
   });
 
   useEffect(() => {
@@ -15,9 +33,15 @@ function ProfilePage() {
       try {
         const data = await authAPI.getProfile();
         setProfile(data.user);
-        setNameForm(f => ({ ...f, name: data.user.name }));
+        setNameForm((f) => ({ ...f, name: data.user.name }));
+        setDetailsForm((f) => ({
+          ...f,
+          bio: data.user.bio || "",
+          major: data.user.major || "",
+          year: data.user.year || "",
+        }));
       } catch (err) {
-        console.error('Failed to fetch profile');
+        console.error("Failed to fetch profile");
       } finally {
         setLoading(false);
       }
@@ -27,32 +51,69 @@ function ProfilePage() {
 
   const handleNameSave = async (e) => {
     e.preventDefault();
-    setNameForm(f => ({ ...f, saving: true, error: '', success: '' }));
+    setNameForm((f) => ({ ...f, saving: true, error: "", success: "" }));
     try {
       const data = await authAPI.updateProfile({ name: nameForm.name });
       setProfile(data.user);
-      setNameForm(f => ({ ...f, editing: false, saving: false, success: 'Name updated!' }));
+      setNameForm((f) => ({
+        ...f,
+        editing: false,
+        saving: false,
+        success: "Name updated!",
+      }));
     } catch (err) {
-      setNameForm(f => ({
-        ...f, saving: false,
-        error: err.response?.data?.error || 'Failed to update name',
+      setNameForm((f) => ({
+        ...f,
+        saving: false,
+        error: err.response?.data?.error || "Failed to update name",
+      }));
+    }
+  };
+
+  const handleDetailsSave = async (e) => {
+    e.preventDefault();
+    setDetailsForm((f) => ({ ...f, saving: true, error: "", success: "" }));
+    try {
+      const data = await authAPI.updateProfile({
+        bio: detailsForm.bio,
+        major: detailsForm.major,
+        year: detailsForm.year,
+      });
+      setProfile(data.user);
+      setDetailsForm((f) => ({
+        ...f,
+        saving: false,
+        success: "Profile updated!",
+      }));
+    } catch (err) {
+      setDetailsForm((f) => ({
+        ...f,
+        saving: false,
+        error: err.response?.data?.error || "Failed to update profile",
       }));
     }
   };
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
-    setPwForm(f => ({ ...f, saving: true, error: '', success: '' }));
+    setPwForm((f) => ({ ...f, saving: true, error: "", success: "" }));
     try {
       await authAPI.changePassword({
         currentPassword: pwForm.currentPassword,
         newPassword: pwForm.newPassword,
       });
-      setPwForm({ currentPassword: '', newPassword: '', saving: false, error: '', success: 'Password changed!' });
+      setPwForm({
+        currentPassword: "",
+        newPassword: "",
+        saving: false,
+        error: "",
+        success: "Password changed!",
+      });
     } catch (err) {
-      setPwForm(f => ({
-        ...f, saving: false,
-        error: err.response?.data?.error || 'Failed to change password',
+      setPwForm((f) => ({
+        ...f,
+        saving: false,
+        error: err.response?.data?.error || "Failed to change password",
       }));
     }
   };
@@ -87,11 +148,32 @@ function ProfilePage() {
               <span className="font-semibold">Role</span>
               <span className="capitalize">{profile?.role}</span>
             </div>
+            {profile?.major && (
+              <div className="flex justify-between">
+                <span className="font-semibold">Major</span>
+                <span>{profile.major}</span>
+              </div>
+            )}
+            {profile?.year && (
+              <div className="flex justify-between">
+                <span className="font-semibold">Year</span>
+                <span>{profile.year}</span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="font-semibold">Member since</span>
-              <span>{profile?.created_at && new Date(profile.created_at).toLocaleDateString()}</span>
+              <span>
+                {profile?.created_at &&
+                  new Date(profile.created_at).toLocaleDateString()}
+              </span>
             </div>
           </div>
+          {profile?.bio && (
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <p className="text-sm font-semibold text-gray-700 mb-1">Bio</p>
+              <p className="text-sm text-gray-600">{profile.bio}</p>
+            </div>
+          )}
         </div>
 
         {/* Edit Name */}
@@ -109,16 +191,99 @@ function ProfilePage() {
           )}
           <form onSubmit={handleNameSave} className="flex gap-3">
             <input
-              type="text" required minLength={2} maxLength={100}
+              type="text"
+              required
+              minLength={2}
+              maxLength={100}
               value={nameForm.name}
-              onChange={e => setNameForm(f => ({ ...f, name: e.target.value }))}
+              onChange={(e) =>
+                setNameForm((f) => ({ ...f, name: e.target.value }))
+              }
               className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purdue-gold focus:outline-none"
             />
             <button
-              type="submit" disabled={nameForm.saving}
+              type="submit"
+              disabled={nameForm.saving}
               className="bg-purdue-gold text-black px-6 py-2 rounded-lg font-bold hover:bg-purdue-gold-dark disabled:opacity-50 transition-colors"
             >
-              {nameForm.saving ? 'Saving...' : 'Save'}
+              {nameForm.saving ? "Saving..." : "Save"}
+            </button>
+          </form>
+        </div>
+
+        {/* Edit Profile Details */}
+        <div className="bg-white border-2 border-gray-200 rounded-lg p-6 mb-6">
+          <h2 className="text-xl font-bold mb-4">Profile Details</h2>
+          {detailsForm.success && (
+            <div className="bg-green-50 border-2 border-green-200 text-green-800 px-4 py-3 rounded mb-4">
+              {detailsForm.success}
+            </div>
+          )}
+          {detailsForm.error && (
+            <div className="bg-red-50 border-2 border-red-200 text-red-800 px-4 py-3 rounded mb-4">
+              {detailsForm.error}
+            </div>
+          )}
+          <form onSubmit={handleDetailsSave} className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Major
+              </label>
+              <input
+                type="text"
+                maxLength={100}
+                placeholder="e.g. Computer Science"
+                value={detailsForm.major}
+                onChange={(e) =>
+                  setDetailsForm((f) => ({ ...f, major: e.target.value }))
+                }
+                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purdue-gold focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Year
+              </label>
+              <select
+                value={detailsForm.year}
+                onChange={(e) =>
+                  setDetailsForm((f) => ({ ...f, year: e.target.value }))
+                }
+                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purdue-gold focus:outline-none bg-white"
+              >
+                <option value="">— Select year —</option>
+                <option value="Freshman">Freshman</option>
+                <option value="Sophomore">Sophomore</option>
+                <option value="Junior">Junior</option>
+                <option value="Senior">Senior</option>
+                <option value="Graduate">Graduate</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Bio
+              </label>
+              <textarea
+                maxLength={500}
+                rows={4}
+                placeholder="Tell other members a bit about yourself..."
+                value={detailsForm.bio}
+                onChange={(e) =>
+                  setDetailsForm((f) => ({ ...f, bio: e.target.value }))
+                }
+                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purdue-gold focus:outline-none resize-none"
+              />
+              <p className="text-xs text-gray-400 text-right mt-1">
+                {detailsForm.bio.length}/500
+              </p>
+            </div>
+            <button
+              type="submit"
+              disabled={detailsForm.saving}
+              className="bg-purdue-gold text-black px-6 py-2 rounded-lg font-bold hover:bg-purdue-gold-dark disabled:opacity-50 transition-colors"
+            >
+              {detailsForm.saving ? "Saving..." : "Save Details"}
             </button>
           </form>
         </div>
@@ -138,29 +303,43 @@ function ProfilePage() {
           )}
           <form onSubmit={handlePasswordChange} className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Current Password</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Current Password
+              </label>
               <input
-                type="password" required
+                type="password"
+                required
                 value={pwForm.currentPassword}
-                onChange={e => setPwForm(f => ({ ...f, currentPassword: e.target.value }))}
+                onChange={(e) =>
+                  setPwForm((f) => ({ ...f, currentPassword: e.target.value }))
+                }
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purdue-gold focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">New Password</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                New Password
+              </label>
               <input
-                type="password" required minLength={6}
+                type="password"
+                required
+                minLength={6}
                 value={pwForm.newPassword}
-                onChange={e => setPwForm(f => ({ ...f, newPassword: e.target.value }))}
+                onChange={(e) =>
+                  setPwForm((f) => ({ ...f, newPassword: e.target.value }))
+                }
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purdue-gold focus:outline-none"
               />
-              <p className="text-sm text-gray-500 mt-1">At least 6 characters</p>
+              <p className="text-sm text-gray-500 mt-1">
+                At least 6 characters
+              </p>
             </div>
             <button
-              type="submit" disabled={pwForm.saving}
+              type="submit"
+              disabled={pwForm.saving}
               className="w-full bg-purdue-gold text-black py-3 rounded-lg font-bold hover:bg-purdue-gold-dark disabled:opacity-50 transition-colors"
             >
-              {pwForm.saving ? 'Changing...' : 'Change Password'}
+              {pwForm.saving ? "Changing..." : "Change Password"}
             </button>
           </form>
         </div>

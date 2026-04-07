@@ -15,6 +15,8 @@ if (!process.env.DB_HOST) {
   process.env.DB_PORT = "5433";
 }
 require("dotenv").config();
+const fs = require("fs");
+const path = require("path");
 const db = require("../../db");
 
 // Bcrypt hash of "Password123!"
@@ -27,6 +29,12 @@ const PASSWORD_HASH =
 // ============================================
 const users = [
   // Club admins
+  {
+    name: "Admin User",
+    email: "admin@pfw.edu",
+    passwordHash: PASSWORD_HASH,
+    role: "admin",
+  },
   {
     name: "Jordan Ellis",
     email: "jellis@pfw.edu",
@@ -1436,10 +1444,9 @@ const joinRequests = [
 async function seed() {
   console.log("Seeding database...");
 
-  await db.query(
-    "TRUNCATE TABLE join_requests, memberships, clubs, users RESTART IDENTITY CASCADE",
-  );
-  console.log("  Cleared existing data.");
+  const schema = fs.readFileSync(path.join(__dirname, "../schema.sql"), "utf8");
+  await db.query(schema);
+  console.log("  Applied schema (tables dropped and recreated).");
 
   // Insert users and build email → id map
   const userIdByEmail = {};

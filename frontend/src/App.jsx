@@ -10,6 +10,7 @@ import CreateClubPage from "./pages/CreateClubPage";
 import EditClubPage from "./pages/EditClubPage";
 import ClubMembersPage from "./pages/ClubMembersPage";
 import ProfilePage from "./pages/ProfilePage";
+import PublicProfilePage from "./pages/PublicProfilePage";
 import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
         <Route path="/clubs/create" element={<CreateClubPage />} />
         <Route path="/clubs/:id/edit" element={<EditClubPage />} />
         <Route path="/clubs/:id/members" element={<ClubMembersPage />} />
+        <Route path="/profile/:id" element={<PublicProfilePage />} />
       </Route>
 
       <Route path="/clubs/:id" element={<ClubDetailPage />} />

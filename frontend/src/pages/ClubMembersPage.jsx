@@ -1,14 +1,14 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import NavHeader from '../components/NavHeader';
-import { membersAPI } from '../services/api';
+import { useState, useEffect, useCallback } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import NavHeader from "../components/NavHeader";
+import { membersAPI } from "../services/api";
 
 function ClubMembersPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const fetchMembers = useCallback(async () => {
     try {
@@ -16,28 +16,30 @@ function ClubMembersPage() {
       setData(result);
     } catch (err) {
       if (err.response?.status === 403) {
-        navigate('/dashboard');
+        navigate("/dashboard");
       } else {
-        setError('Failed to load members');
+        setError("Failed to load members");
       }
     } finally {
       setLoading(false);
     }
   }, [id, navigate]);
 
-  useEffect(() => { fetchMembers(); }, [fetchMembers]);
+  useEffect(() => {
+    fetchMembers();
+  }, [fetchMembers]);
 
   const handleRemove = async (userId, userName) => {
     if (!window.confirm(`Remove ${userName} from this club?`)) return;
     try {
       await membersAPI.removeMember(id, userId);
-      setData(prev => ({
+      setData((prev) => ({
         ...prev,
-        members: prev.members.filter(m => m.id !== userId),
+        members: prev.members.filter((m) => m.id !== userId),
         member_count: prev.member_count - 1,
       }));
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to remove member');
+      alert(err.response?.data?.error || "Failed to remove member");
     }
   };
 
@@ -71,17 +73,32 @@ function ClubMembersPage() {
             <table className="w-full">
               <thead className="bg-gray-50 border-b-2 border-gray-200">
                 <tr>
-                  <th className="text-left px-6 py-3 text-sm font-semibold text-gray-700">Name</th>
-                  <th className="text-left px-6 py-3 text-sm font-semibold text-gray-700">Email</th>
-                  <th className="text-left px-6 py-3 text-sm font-semibold text-gray-700">Joined</th>
+                  <th className="text-left px-6 py-3 text-sm font-semibold text-gray-700">
+                    Name
+                  </th>
+                  <th className="text-left px-6 py-3 text-sm font-semibold text-gray-700">
+                    Email
+                  </th>
+                  <th className="text-left px-6 py-3 text-sm font-semibold text-gray-700">
+                    Joined
+                  </th>
                   <th className="px-6 py-3"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {data?.members?.map(member => (
+                {data?.members?.map((member) => (
                   <tr key={member.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 font-medium">{member.name}</td>
-                    <td className="px-6 py-4 text-gray-600 text-sm">{member.email}</td>
+                    <td className="px-6 py-4 font-medium">
+                      <Link
+                        to={`/profile/${member.id}`}
+                        className="hover:text-purdue-gold transition-colors"
+                      >
+                        {member.name}
+                      </Link>
+                    </td>
+                    <td className="px-6 py-4 text-gray-600 text-sm">
+                      {member.email}
+                    </td>
                     <td className="px-6 py-4 text-gray-600 text-sm">
                       {new Date(member.joined_at).toLocaleDateString()}
                     </td>
