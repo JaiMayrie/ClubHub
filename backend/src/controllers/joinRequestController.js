@@ -107,11 +107,9 @@ exports.getClubJoinRequests = async (req, res) => {
     }
 
     if (clubCheck.rows[0].admin_id !== userId) {
-      return res
-        .status(403)
-        .json({
-          error: "You are not authorized to view requests for this club",
-        });
+      return res.status(403).json({
+        error: "You are not authorized to view requests for this club",
+      });
     }
 
     // Get pending join requests with user information
@@ -230,19 +228,13 @@ exports.updateJoinRequestStatus = async (req, res) => {
         id,
       ]);
 
-      // If approved, create membership and increment member count
+      // If approved, create membership
       if (status === "approved") {
         // Add to memberships
         await client.query(
           `INSERT INTO memberships (user_id, club_id)
            VALUES ($1, $2)`,
           [request.user_id, request.club_id],
-        );
-
-        // Increment club member count
-        await client.query(
-          "UPDATE clubs SET member_count = member_count + 1 WHERE id = $1",
-          [request.club_id],
         );
       }
 

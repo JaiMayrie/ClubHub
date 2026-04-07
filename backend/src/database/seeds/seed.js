@@ -1400,8 +1400,8 @@ async function seed() {
   for (const club of clubs) {
     const adminId = userIdByEmail[club.adminEmail];
     const { rows } = await db.query(
-      `INSERT INTO clubs (name, category, description, meeting_info, contact_email, admin_id, member_count)
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, contact_email`,
+      `INSERT INTO clubs (name, category, description, meeting_info, contact_email, admin_id)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, contact_email`,
       [
         club.name,
         club.category,
@@ -1409,7 +1409,6 @@ async function seed() {
         club.meetingInfo,
         club.contactEmail,
         adminId,
-        club.memberCount,
       ],
     );
     clubIdByContactEmail[rows[0].contact_email] = rows[0].id;
