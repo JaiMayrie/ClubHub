@@ -42,10 +42,10 @@ function ClubDetailPage() {
           joinRequestsAPI.getMy(),
         ]);
         const isMember = memberships.memberships.some(
-          (m) => m.club_id === parseInt(id)
+          (m) => m.club_id === parseInt(id),
         );
         const hasPending = requests.requests.some(
-          (r) => r.club_id === parseInt(id) && r.status === "pending"
+          (r) => r.club_id === parseInt(id) && r.status === "pending",
         );
         if (isMember) {
           setUserStatus("member");
@@ -107,6 +107,8 @@ function ClubDetailPage() {
     );
   }
 
+  const isOwner = user && club && club.admin_id === user.id;
+
   return (
     <div className="min-h-screen bg-gray-50">
       <NavHeader />
@@ -119,7 +121,6 @@ function ClubDetailPage() {
         </div>
 
         <div className="bg-white border-2 border-gray-200 rounded-lg p-8">
-
           <div className="mb-6">
             <h1 className="text-4xl font-bold mb-3">{club.name}</h1>
             <div className="flex items-center gap-3">
@@ -168,22 +169,32 @@ function ClubDetailPage() {
           {user && (
             <div className="mt-8 pt-8 border-t-2 border-gray-200">
               <h2 className="text-2xl font-bold mb-4">
-                {userStatus === "member" ? "You are a member" : "Request to Join"}
+                {isOwner
+                  ? "Your Club"
+                  : userStatus === "member"
+                    ? "You are a member"
+                    : "Request to Join"}
               </h2>
 
-              {userStatus === "member" && (
+              {isOwner && (
+                <div className="bg-blue-50 border-2 border-blue-200 text-blue-800 px-4 py-3 rounded">
+                  You are the admin of this club.
+                </div>
+              )}
+
+              {!isOwner && userStatus === "member" && (
                 <div className="bg-green-50 border-2 border-green-200 text-green-800 px-4 py-3 rounded">
                   You are already a member of this club.
                 </div>
               )}
 
-              {userStatus === "pending" && (
+              {!isOwner && userStatus === "pending" && (
                 <div className="bg-yellow-50 border-2 border-yellow-200 text-yellow-800 px-4 py-3 rounded">
                   Your join request is pending approval.
                 </div>
               )}
 
-              {!userStatus && (
+              {!isOwner && !userStatus && (
                 <>
                   {error && (
                     <div className="bg-red-50 border-2 border-red-200 text-red-800 px-4 py-3 rounded mb-4">
@@ -238,7 +249,6 @@ function ClubDetailPage() {
               </p>
             </div>
           )}
-
         </div>
       </main>
     </div>
