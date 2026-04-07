@@ -7,6 +7,8 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const db = require("../db");
+const fs = require("fs");
+const path = require("path");
 
 // Generates a JWT token containing userId and role
 // Token expires in 7 days
@@ -153,7 +155,7 @@ exports.getMe = async (req, res) => {
 exports.getProfile = async (req, res) => {
   try {
     const result = await db.query(
-      "SELECT id, name, email, role, bio, major, year, created_at FROM users WHERE id = $1",
+      "SELECT id, name, email, role, bio, major, year, avatar_url, created_at FROM users WHERE id = $1",
       [req.userId],
     );
 
@@ -173,7 +175,7 @@ exports.getPublicProfile = async (req, res) => {
     const { id } = req.params;
 
     const userResult = await db.query(
-      "SELECT id, name, bio, major, year, created_at FROM users WHERE id = $1",
+      "SELECT id, name, bio, major, year, avatar_url, created_at FROM users WHERE id = $1",
       [id],
     );
 
@@ -244,7 +246,7 @@ exports.updateProfile = async (req, res) => {
            major = COALESCE($3, major),
            year  = COALESCE($4, year)
        WHERE id = $5
-       RETURNING id, name, email, role, bio, major, year, created_at`,
+       RETURNING id, name, email, role, bio, major, year, avatar_url, created_at`,
       [
         name !== undefined ? name.trim() : null,
         bio !== undefined ? bio : null,
@@ -264,6 +266,50 @@ exports.updateProfile = async (req, res) => {
     });
   } catch (error) {
     console.error("Update profile error:", error);
+    return res.status(500).json({ error: "Server error" });
+  }
+};
+
+exports.uploadAvatar = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+
+    // Fetch current avatar so we can delete the old file
+    const current = await db.query(
+      "SELECT avatar_url FROM users WHERE id = $1",
+      [req.userId],
+    );
+    const oldUrl = current.rows[0]?.avatar_url;
+
+    const result = await db.query(
+      `UPDATE users SET avatar_url = $1 WHERE id = $2
+       RETURNING id, name, email, role, bio, major, year, avatar_url, created_at`,
+      [avatarUrl, req.userId],
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Delete old avatar file (ignore errors if file is missing)
+    if (oldUrl) {
+      fs.unlink(path.join(__dirname, "../../", oldUrl), () => {});
+    }
+
+    return res.json({
+      message: "Avatar updated successfully",
+      user: result.rows[0],
+    });
+  } catch (error) {
+    // Clean up uploaded file on error
+    if (req.file) {
+      fs.unlink(req.file.path, () => {});
+    }
+    console.error("Upload avatar error:", error);
     return res.status(500).json({ error: "Server error" });
   }
 };

@@ -2,6 +2,11 @@ import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
+export const getAvatarUrl = (avatarUrl) => {
+  if (!avatarUrl) return null;
+  return `${API_URL.replace("/api", "")}${avatarUrl}`;
+};
+
 const api = axios.create({
   baseURL: API_URL,
 });
@@ -71,6 +76,15 @@ export const authAPI = {
 
   getPublicProfile: async (userId) => {
     const response = await api.get(`/auth/users/${userId}`);
+    return response.data;
+  },
+
+  uploadAvatar: async (file) => {
+    const formData = new FormData();
+    formData.append("avatar", file);
+    const response = await api.post("/auth/avatar", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return response.data;
   },
 };

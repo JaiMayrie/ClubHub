@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import NavHeader from "../components/NavHeader";
 import { authAPI } from "../services/api";
+import UserAvatar from "../components/UserAvatar";
 
 function PublicProfilePage() {
   const { id } = useParams();
@@ -64,9 +65,11 @@ function PublicProfilePage() {
         {/* Header card */}
         <div className="bg-white border-2 border-gray-200 rounded-lg p-6 mb-6">
           <div className="flex items-center gap-5">
-            <div className="w-16 h-16 rounded-full bg-purdue-gold flex items-center justify-center text-2xl font-bold text-black flex-shrink-0">
-              {initials}
-            </div>
+            <UserAvatar
+              name={user.name}
+              avatarUrl={user.avatar_url}
+              size="md"
+            />
             <div>
               <h1 className="text-2xl font-bold">{user.name}</h1>
               <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm text-gray-600">

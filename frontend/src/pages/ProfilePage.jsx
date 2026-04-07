@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import NavHeader from "../components/NavHeader";
 import { authAPI } from "../services/api";
+import UserAvatar from "../components/UserAvatar";
 
 function ProfilePage() {
   const [profile, setProfile] = useState(null);
@@ -27,6 +28,14 @@ function ProfilePage() {
     error: "",
     success: "",
   });
+  const [avatarForm, setAvatarForm] = useState({
+    file: null,
+    preview: null,
+    saving: false,
+    error: "",
+    success: "",
+  });
+  const avatarInputRef = useRef(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -118,6 +127,42 @@ function ProfilePage() {
     }
   };
 
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setAvatarForm((f) => ({
+      ...f,
+      file,
+      preview: URL.createObjectURL(file),
+      error: "",
+      success: "",
+    }));
+  };
+
+  const handleAvatarUpload = async (e) => {
+    e.preventDefault();
+    if (!avatarForm.file) return;
+    setAvatarForm((f) => ({ ...f, saving: true, error: "", success: "" }));
+    try {
+      const data = await authAPI.uploadAvatar(avatarForm.file);
+      setProfile(data.user);
+      setAvatarForm((f) => ({
+        ...f,
+        saving: false,
+        success: "Photo updated!",
+        file: null,
+        preview: null,
+      }));
+      if (avatarInputRef.current) avatarInputRef.current.value = "";
+    } catch (err) {
+      setAvatarForm((f) => ({
+        ...f,
+        saving: false,
+        error: err.response?.data?.error || "Failed to upload photo",
+      }));
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -174,6 +219,49 @@ function ProfilePage() {
               <p className="text-sm text-gray-600">{profile.bio}</p>
             </div>
           )}
+        </div>
+
+        {/* Profile Photo */}
+        <div className="bg-white border-2 border-gray-200 rounded-lg p-6 mb-6">
+          <h2 className="text-xl font-bold mb-4">Profile Photo</h2>
+          {avatarForm.success && (
+            <div className="bg-green-50 border-2 border-green-200 text-green-800 px-4 py-3 rounded mb-4">
+              {avatarForm.success}
+            </div>
+          )}
+          {avatarForm.error && (
+            <div className="bg-red-50 border-2 border-red-200 text-red-800 px-4 py-3 rounded mb-4">
+              {avatarForm.error}
+            </div>
+          )}
+          <form onSubmit={handleAvatarUpload} className="space-y-4">
+            <div className="flex items-center gap-4">
+              <UserAvatar
+                name={profile?.name}
+                avatarUrl={avatarForm.preview || profile?.avatar_url}
+                size="lg"
+              />
+              <div className="flex-1">
+                <input
+                  ref={avatarInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={handleAvatarChange}
+                  className="block w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purdue-gold file:text-black hover:file:bg-purdue-gold-dark file:cursor-pointer"
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  JPEG, PNG, WebP, or GIF · Max 2 MB
+                </p>
+              </div>
+            </div>
+            <button
+              type="submit"
+              disabled={avatarForm.saving || !avatarForm.file}
+              className="bg-purdue-gold text-black px-6 py-2 rounded-lg font-bold hover:bg-purdue-gold-dark disabled:opacity-50 transition-colors"
+            >
+              {avatarForm.saving ? "Uploading..." : "Upload Photo"}
+            </button>
+          </form>
         </div>
 
         {/* Edit Name */}

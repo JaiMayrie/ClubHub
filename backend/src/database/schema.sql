@@ -20,6 +20,7 @@ CREATE TABLE users (
   bio TEXT DEFAULT '',
   major VARCHAR(100) DEFAULT '',
   year VARCHAR(20) DEFAULT '' CHECK (year IN ('', 'Freshman', 'Sophomore', 'Junior', 'Senior', 'Graduate', 'Other')),
+  avatar_url VARCHAR(500) DEFAULT '',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
