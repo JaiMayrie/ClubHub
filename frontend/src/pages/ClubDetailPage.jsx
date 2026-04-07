@@ -166,6 +166,18 @@ function ClubDetailPage() {
             )}
           </div>
 
+          {/* View members button */}
+          {(isOwner || userStatus === "member") && (
+            <div className="mt-1 pt-2 border-t-2 border-gray-200">
+              <Link
+                to={`/clubs/${id}/members`}
+                className="inline-block bg-purdue-gold text-black px-5 py-2 rounded-lg font-semibold hover:bg-purdue-gold-dark transition-colors"
+              >
+                View Members
+              </Link>
+            </div>
+          )}
+
           {user && (
             <div className="mt-8 pt-8 border-t-2 border-gray-200">
               <h2 className="text-2xl font-bold mb-4">
@@ -176,15 +188,13 @@ function ClubDetailPage() {
                     : "Request to Join"}
               </h2>
 
-              {isOwner && (
-                <div className="bg-blue-50 border-2 border-blue-200 text-blue-800 px-4 py-3 rounded">
-                  You are the admin of this club.
-                </div>
-              )}
-
-              {!isOwner && userStatus === "member" && (
-                <div className="bg-green-50 border-2 border-green-200 text-green-800 px-4 py-3 rounded">
-                  You are already a member of this club.
+              {(isOwner || userStatus === "member") && (
+                <div className="flex flex-col gap-3">
+                  <div className="bg-blue-50 border-2 border-blue-200 text-blue-800 px-4 py-3 rounded">
+                    {isOwner
+                      ? "You are the administrator of this club."
+                      : "You are a member of this club."}
+                  </div>
                 </div>
               )}
 
