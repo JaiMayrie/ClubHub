@@ -1,4 +1,4 @@
-const db = require('../db');
+const db = require("../db");
 
 /**
  * Get all members of a club (admin only)
@@ -13,17 +13,17 @@ exports.getClubMembers = async (req, res) => {
 
     // Verify club exists and user is the admin
     const clubCheck = await db.query(
-      'SELECT id, name, admin_id, member_count FROM clubs WHERE id = $1',
-      [id]
+      "SELECT id, name, admin_id FROM clubs WHERE id = $1",
+      [id],
     );
 
     if (clubCheck.rows.length === 0) {
-      return res.status(404).json({ error: 'Club not found' });
+      return res.status(404).json({ error: "Club not found" });
     }
 
     if (clubCheck.rows[0].admin_id !== userId) {
       return res.status(403).json({
-        error: 'Only the club admin can view the member list',
+        error: "Only the club admin can view the member list",
       });
     }
 
@@ -37,17 +37,17 @@ exports.getClubMembers = async (req, res) => {
        JOIN users ON memberships.user_id = users.id
        WHERE memberships.club_id = $1
        ORDER BY memberships.joined_at ASC`,
-      [id]
+      [id],
     );
 
     return res.json({
       club_name: clubCheck.rows[0].name,
-      member_count: clubCheck.rows[0].member_count,
+      member_count: result.rows.length,
       members: result.rows,
     });
   } catch (error) {
-    console.error('Error fetching club members:', error);
-    return res.status(500).json({ error: 'Failed to fetch members' });
+    console.error("Error fetching club members:", error);
+    return res.status(500).json({ error: "Failed to fetch members" });
   }
 };
 
@@ -64,66 +64,48 @@ exports.removeClubMember = async (req, res) => {
 
     // Verify club exists and requester is the admin
     const clubCheck = await db.query(
-      'SELECT admin_id FROM clubs WHERE id = $1',
-      [id]
+      "SELECT admin_id FROM clubs WHERE id = $1",
+      [id],
     );
 
     if (clubCheck.rows.length === 0) {
-      return res.status(404).json({ error: 'Club not found' });
+      return res.status(404).json({ error: "Club not found" });
     }
 
     if (clubCheck.rows[0].admin_id !== adminId) {
       return res.status(403).json({
-        error: 'Only the club admin can remove members',
+        error: "Only the club admin can remove members",
       });
     }
 
     // Prevent admin from removing themselves
     if (parseInt(targetUserId) === adminId) {
       return res.status(400).json({
-        error: 'Club admin cannot remove themselves from the club',
+        error: "Club admin cannot remove themselves from the club",
       });
     }
 
     // Check membership exists
     const memberCheck = await db.query(
-      'SELECT id FROM memberships WHERE user_id = $1 AND club_id = $2',
-      [targetUserId, id]
+      "SELECT id FROM memberships WHERE user_id = $1 AND club_id = $2",
+      [targetUserId, id],
     );
 
     if (memberCheck.rows.length === 0) {
       return res.status(404).json({
-        error: 'This user is not a member of the club',
+        error: "This user is not a member of the club",
       });
     }
 
-    // Remove membership and decrement count in a transaction
-    const client = await db.pool.connect();
+    // Remove membership
+    await db.query(
+      "DELETE FROM memberships WHERE user_id = $1 AND club_id = $2",
+      [targetUserId, id],
+    );
 
-    try {
-      await client.query('BEGIN');
-
-      await client.query(
-        'DELETE FROM memberships WHERE user_id = $1 AND club_id = $2',
-        [targetUserId, id]
-      );
-
-      await client.query(
-        'UPDATE clubs SET member_count = GREATEST(member_count - 1, 0) WHERE id = $1',
-        [id]
-      );
-
-      await client.query('COMMIT');
-
-      return res.json({ message: 'Member removed successfully' });
-    } catch (error) {
-      await client.query('ROLLBACK');
-      throw error;
-    } finally {
-      client.release();
-    }
+    return res.json({ message: "Member removed successfully" });
   } catch (error) {
-    console.error('Error removing member:', error);
-    return res.status(500).json({ error: 'Failed to remove member' });
+    console.error("Error removing member:", error);
+    return res.status(500).json({ error: "Failed to remove member" });
   }
 };

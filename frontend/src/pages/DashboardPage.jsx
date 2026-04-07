@@ -14,7 +14,7 @@ function DashboardPage() {
   const isAdmin = user?.role === "admin";
 
   const handleLeaveClub = useCallback((clubId) => {
-    setMyMemberships(prev => prev.filter(m => m.club_id !== clubId));
+    setMyMemberships((prev) => prev.filter((m) => m.club_id !== clubId));
   }, []);
 
   const fetchDashboardData = useCallback(async () => {
@@ -176,7 +176,9 @@ function RequestCard({ request, onAction }) {
           <p className="font-semibold truncate">{request.user_name}</p>
           <p className="text-sm text-gray-600 truncate">{request.user_email}</p>
           {request.message && (
-            <p className="text-sm text-gray-700 mt-2 italic">"{request.message}"</p>
+            <p className="text-sm text-gray-700 mt-2 italic">
+              "{request.message}"
+            </p>
           )}
           <p className="text-xs text-gray-400 mt-1">
             {new Date(request.created_at).toLocaleDateString()}
@@ -184,14 +186,14 @@ function RequestCard({ request, onAction }) {
         </div>
         <div className="flex gap-2 flex-shrink-0">
           <button
-            onClick={() => handleAction('approved')}
+            onClick={() => handleAction("approved")}
             disabled={processing}
             className="bg-green-500 text-white px-3 py-1.5 rounded text-sm font-semibold hover:bg-green-600 disabled:opacity-50 transition-colors"
           >
             Approve
           </button>
           <button
-            onClick={() => handleAction('rejected')}
+            onClick={() => handleAction("rejected")}
             disabled={processing}
             className="bg-red-500 text-white px-3 py-1.5 rounded text-sm font-semibold hover:bg-red-600 disabled:opacity-50 transition-colors"
           >
@@ -207,6 +209,7 @@ function RequestCard({ request, onAction }) {
 function AdminClubCard({ club }) {
   const [requests, setRequests] = useState([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
+  const [memberCount, setMemberCount] = useState(club.member_count);
 
   const fetchRequests = useCallback(async () => {
     setLoadingRequests(true);
@@ -214,21 +217,26 @@ function AdminClubCard({ club }) {
       const data = await joinRequestsAPI.getForClub(club.id);
       setRequests(data.requests);
     } catch (error) {
-      console.error('Error fetching requests:', error);
+      console.error("Error fetching requests:", error);
     } finally {
       setLoadingRequests(false);
     }
   }, [club.id]);
 
-  useEffect(() => { fetchRequests(); }, [fetchRequests]);
+  useEffect(() => {
+    fetchRequests();
+  }, [fetchRequests]);
 
   const handleRequestAction = async (requestId, status) => {
     try {
       await joinRequestsAPI.updateStatus(requestId, status);
-      setRequests(prev => prev.filter(r => r.id !== requestId)); 
+      setRequests((prev) => prev.filter((r) => r.id !== requestId));
+      if (status === "approved") {
+        setMemberCount((prev) => Number(prev) + 1);
+      }
     } catch (error) {
-      console.error('Error updating request:', error);
-      alert('Failed to update request. Please try again.');
+      console.error("Error updating request:", error);
+      alert("Failed to update request. Please try again.");
     }
   };
 
@@ -237,7 +245,7 @@ function AdminClubCard({ club }) {
       <div className="flex justify-between items-start mb-4">
         <div>
           <h3 className="text-2xl font-bold">{club.name}</h3>
-          <p className="text-gray-600 mt-1">{club.member_count} members</p>
+          <p className="text-gray-600 mt-1">{memberCount} members</p>
         </div>
         {requests.length > 0 && (
           <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">
@@ -305,7 +313,7 @@ function StudentClubCard({ membership, onLeave }) {
       await membershipsAPI.leave(membership.club_id);
       onLeave(membership.club_id);
     } catch (err) {
-      alert('Failed to leave club. Please try again.');
+      alert("Failed to leave club. Please try again.");
     } finally {
       setLeaving(false);
       setShowConfirm(false);
@@ -345,7 +353,7 @@ function StudentClubCard({ membership, onLeave }) {
                 disabled={leaving}
                 className="bg-red-500 text-white px-3 py-1 rounded text-sm font-semibold hover:bg-red-600 disabled:opacity-50"
               >
-                {leaving ? 'Leaving...' : 'Confirm'}
+                {leaving ? "Leaving..." : "Confirm"}
               </button>
               <button
                 onClick={() => setShowConfirm(false)}
@@ -368,8 +376,8 @@ function PendingRequestCard({ request }) {
       <div>
         <h3 className="text-lg font-bold">{request.club_name}</h3>
         <p className="text-sm text-gray-500 mt-1">
-          {request.club_category} •{' '}
-          Requested {new Date(request.created_at).toLocaleDateString()}
+          {request.club_category} • Requested{" "}
+          {new Date(request.created_at).toLocaleDateString()}
         </p>
       </div>
       <span className="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full text-sm font-semibold flex-shrink-0">

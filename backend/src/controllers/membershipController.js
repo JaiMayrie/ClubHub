@@ -1,8 +1,8 @@
-const db = require('../db');
+const db = require("../db");
 
 /**
  * Get current user's club memberships
- * 
+ *
  * @route   GET /api/memberships/my-memberships
  * @access  Private
  */
@@ -20,28 +20,27 @@ exports.getMyMemberships = async (req, res) => {
         clubs.description,
         clubs.meeting_info,
         clubs.contact_email,
-        clubs.member_count
+        (SELECT COUNT(*) FROM memberships m2 WHERE m2.club_id = clubs.id) AS member_count
        FROM memberships
        JOIN clubs ON memberships.club_id = clubs.id
        WHERE memberships.user_id = $1
        ORDER BY memberships.joined_at DESC`,
-      [userId]
+      [userId],
     );
 
     res.json({
       memberships: result.rows,
-      count: result.rows.length
+      count: result.rows.length,
     });
-
   } catch (error) {
-    console.error('Error fetching memberships:', error);
-    res.status(500).json({ error: 'Failed to fetch memberships' });
+    console.error("Error fetching memberships:", error);
+    res.status(500).json({ error: "Failed to fetch memberships" });
   }
 };
 
 /**
  * Leave a club (remove membership)
- * 
+ *
  * @route   DELETE /api/memberships/:clubId
  * @access  Private
  */
@@ -52,45 +51,25 @@ exports.leaveClub = async (req, res) => {
 
     // Check if membership exists
     const membershipCheck = await db.query(
-      'SELECT id FROM memberships WHERE user_id = $1 AND club_id = $2',
-      [userId, clubId]
+      "SELECT id FROM memberships WHERE user_id = $1 AND club_id = $2",
+      [userId, clubId],
     );
 
     if (membershipCheck.rows.length === 0) {
-      return res.status(404).json({ error: 'You are not a member of this club' });
+      return res
+        .status(404)
+        .json({ error: "You are not a member of this club" });
     }
 
-    // Begin transaction
-    const client = await db.pool.connect();
-    
-    try {
-      await client.query('BEGIN');
+    // Delete membership
+    await db.query(
+      "DELETE FROM memberships WHERE user_id = $1 AND club_id = $2",
+      [userId, clubId],
+    );
 
-      // Delete membership
-      await client.query(
-        'DELETE FROM memberships WHERE user_id = $1 AND club_id = $2',
-        [userId, clubId]
-      );
-
-      // Decrement member count
-      await client.query(
-        'UPDATE clubs SET member_count = GREATEST(member_count - 1, 0) WHERE id = $1',
-        [clubId]
-      );
-
-      await client.query('COMMIT');
-
-      res.json({ message: 'Successfully left the club' });
-
-    } catch (error) {
-      await client.query('ROLLBACK');
-      throw error;
-    } finally {
-      client.release();
-    }
-
+    res.json({ message: "Successfully left the club" });
   } catch (error) {
-    console.error('Error leaving club:', error);
-    res.status(500).json({ error: 'Failed to leave club' });
+    console.error("Error leaving club:", error);
+    res.status(500).json({ error: "Failed to leave club" });
   }
 };

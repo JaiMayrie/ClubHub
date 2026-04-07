@@ -919,56 +919,6 @@ const clubs = [
     memberCount: 26,
   },
   {
-    name: "International Student Organization",
-    category: "Special Interest",
-    description:
-      "The International Student Organization provides support, brings students together, and embraces customs, traditions, and values from around the world.",
-    meetingInfo: "Monthly meetings - Walb Student Union 210",
-    contactEmail: "iso2@pfw.edu",
-    adminEmail: "sreyes@pfw.edu",
-    memberCount: 29,
-  },
-  {
-    name: "Sociology Student Association",
-    category: "Academic",
-    description:
-      "The Sociology Student Association helps students explore sociology, connect with fellow sociology students, and build a supportive academic community.",
-    meetingInfo: "Bi-weekly Tuesdays, 5:30 PM - Liberal Arts Building 215",
-    contactEmail: "sociology@pfw.edu",
-    adminEmail: "ebrooks@pfw.edu",
-    memberCount: 16,
-  },
-  {
-    name: "Model United Nations",
-    category: "Academic",
-    description:
-      "Model United Nations gives students the opportunity to participate in simulations and learn about United Nations international politics.",
-    meetingInfo: "Weekly Thursdays, 6:00 PM - Liberal Arts Building 200",
-    contactEmail: "modelun@pfw.edu",
-    adminEmail: "zahmed@pfw.edu",
-    memberCount: 18,
-  },
-  {
-    name: "Human Services Organization",
-    category: "Service",
-    description:
-      "The Human Services Organization helps students develop real-world skills through volunteer opportunities, networking, and guest-speaking events.",
-    meetingInfo: "Every other Wednesday, 5:00 PM - Walb Student Union 214",
-    contactEmail: "hso2@pfw.edu",
-    adminEmail: "ncarter@pfw.edu",
-    memberCount: 20,
-  },
-  {
-    name: "Military Science and Leadership Club",
-    category: "Service",
-    description:
-      "The Military Science and Leadership Club supports community-service projects and military-related events and helps students build leadership through service.",
-    meetingInfo: "Bi-weekly Mondays, 6:00 PM - Walb Student Union 220",
-    contactEmail: "armyrotc@pfw.edu",
-    adminEmail: "imartin@pfw.edu",
-    memberCount: 14,
-  },
-  {
     name: "MEDLIFE",
     category: "Service",
     description:
@@ -1268,10 +1218,25 @@ const memberships = [
   // Sam Torres
   { userEmail: "storres@student.pfw.edu", clubContactEmail: "acm@pfw.edu" },
   { userEmail: "storres@student.pfw.edu", clubContactEmail: "esports@pfw.edu" },
+  { userEmail: "storres@student.pfw.edu", clubContactEmail: "gamedev@pfw.edu" },
+  {
+    userEmail: "storres@student.pfw.edu",
+    clubContactEmail: "codingprep@pfw.edu",
+  },
+  {
+    userEmail: "storres@student.pfw.edu",
+    clubContactEmail: "tabletop@pfw.edu",
+  },
   // Mia Chen
   { userEmail: "mchen@student.pfw.edu", clubContactEmail: "amsa@pfw.edu" },
   { userEmail: "mchen@student.pfw.edu", clubContactEmail: "bioclub@pfw.edu" },
   { userEmail: "mchen@student.pfw.edu", clubContactEmail: "tribeta@pfw.edu" },
+  { userEmail: "mchen@student.pfw.edu", clubContactEmail: "prehealth@pfw.edu" },
+  { userEmail: "mchen@student.pfw.edu", clubContactEmail: "yoga@pfw.edu" },
+  {
+    userEmail: "mchen@student.pfw.edu",
+    clubContactEmail: "activeminds@pfw.edu",
+  },
   // Jake Murphy
   {
     userEmail: "jmurphy@student.pfw.edu",
@@ -1281,6 +1246,12 @@ const memberships = [
     userEmail: "jmurphy@student.pfw.edu",
     clubContactEmail: "activeminds@pfw.edu",
   },
+  {
+    userEmail: "jmurphy@student.pfw.edu",
+    clubContactEmail: "ballanalytics@pfw.edu",
+  },
+  { userEmail: "jmurphy@student.pfw.edu", clubContactEmail: "soccer@pfw.edu" },
+  { userEmail: "jmurphy@student.pfw.edu", clubContactEmail: "sab@pfw.edu" },
   // Nia Jackson
   { userEmail: "njackson@student.pfw.edu", clubContactEmail: "bsu@pfw.edu" },
   {
@@ -1288,6 +1259,15 @@ const memberships = [
     clubContactEmail: "activeminds@pfw.edu",
   },
   { userEmail: "njackson@student.pfw.edu", clubContactEmail: "aso@pfw.edu" },
+  {
+    userEmail: "njackson@student.pfw.edu",
+    clubContactEmail: "generationaction@pfw.edu",
+  },
+  {
+    userEmail: "njackson@student.pfw.edu",
+    clubContactEmail: "volunteer@pfw.edu",
+  },
+  { userEmail: "njackson@student.pfw.edu", clubContactEmail: "sga@pfw.edu" },
   // Leo Fischer
   { userEmail: "lfischer@student.pfw.edu", clubContactEmail: "acm@pfw.edu" },
   {
@@ -1298,6 +1278,12 @@ const memberships = [
     userEmail: "lfischer@student.pfw.edu",
     clubContactEmail: "accountingsociety@pfw.edu",
   },
+  {
+    userEmail: "lfischer@student.pfw.edu",
+    clubContactEmail: "financeclub@pfw.edu",
+  },
+  { userEmail: "lfischer@student.pfw.edu", clubContactEmail: "invest@pfw.edu" },
+  { userEmail: "lfischer@student.pfw.edu", clubContactEmail: "data@pfw.edu" },
   // Hannah Scott
   {
     userEmail: "hscott@student.pfw.edu",
@@ -1308,12 +1294,21 @@ const memberships = [
     userEmail: "hscott@student.pfw.edu",
     clubContactEmail: "anthroclub@pfw.edu",
   },
+  { userEmail: "hscott@student.pfw.edu", clubContactEmail: "bookclub@pfw.edu" },
+  { userEmail: "hscott@student.pfw.edu", clubContactEmail: "theatre@pfw.edu" },
+  { userEmail: "hscott@student.pfw.edu", clubContactEmail: "debate@pfw.edu" },
   // Devin Moore
   {
     userEmail: "dmoore@student.pfw.edu",
     clubContactEmail: "basketballclub@pfw.edu",
   },
   { userEmail: "dmoore@student.pfw.edu", clubContactEmail: "esports@pfw.edu" },
+  {
+    userEmail: "dmoore@student.pfw.edu",
+    clubContactEmail: "ballanalytics@pfw.edu",
+  },
+  { userEmail: "dmoore@student.pfw.edu", clubContactEmail: "cyber@pfw.edu" },
+  { userEmail: "dmoore@student.pfw.edu", clubContactEmail: "fitness@pfw.edu" },
   // Fatima Ali
   { userEmail: "fali@student.pfw.edu", clubContactEmail: "msa@pfw.edu" },
   { userEmail: "fali@student.pfw.edu", clubContactEmail: "bsa@pfw.edu" },
@@ -1321,13 +1316,25 @@ const memberships = [
     userEmail: "fali@student.pfw.edu",
     clubContactEmail: "activeminds@pfw.edu",
   },
+  { userEmail: "fali@student.pfw.edu", clubContactEmail: "iso@pfw.edu" },
+  { userEmail: "fali@student.pfw.edu", clubContactEmail: "volunteer@pfw.edu" },
+  { userEmail: "fali@student.pfw.edu", clubContactEmail: "wellness@pfw.edu" },
   // Ryan Bell
   { userEmail: "rbell@student.pfw.edu", clubContactEmail: "asce@pfw.edu" },
   { userEmail: "rbell@student.pfw.edu", clubContactEmail: "acm@pfw.edu" },
+  { userEmail: "rbell@student.pfw.edu", clubContactEmail: "robotics@pfw.edu" },
+  { userEmail: "rbell@student.pfw.edu", clubContactEmail: "cyber@pfw.edu" },
+  { userEmail: "rbell@student.pfw.edu", clubContactEmail: "techinnov@pfw.edu" },
   // Grace Liu
   { userEmail: "gliu@student.pfw.edu", clubContactEmail: "amsa@pfw.edu" },
   { userEmail: "gliu@student.pfw.edu", clubContactEmail: "asmicro@pfw.edu" },
   { userEmail: "gliu@student.pfw.edu", clubContactEmail: "tribeta@pfw.edu" },
+  { userEmail: "gliu@student.pfw.edu", clubContactEmail: "bioclub@pfw.edu" },
+  {
+    userEmail: "gliu@student.pfw.edu",
+    clubContactEmail: "prepharmacy@pfw.edu",
+  },
+  { userEmail: "gliu@student.pfw.edu", clubContactEmail: "chemclub@pfw.edu" },
 ];
 
 // ============================================
@@ -1450,8 +1457,8 @@ async function seed() {
   for (const club of clubs) {
     const adminId = userIdByEmail[club.adminEmail];
     const { rows } = await db.query(
-      `INSERT INTO clubs (name, category, description, meeting_info, contact_email, admin_id, member_count)
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, contact_email`,
+      `INSERT INTO clubs (name, category, description, meeting_info, contact_email, admin_id)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, contact_email`,
       [
         club.name,
         club.category,
@@ -1459,7 +1466,6 @@ async function seed() {
         club.meetingInfo,
         club.contactEmail,
         adminId,
-        club.memberCount,
       ],
     );
     clubIdByContactEmail[rows[0].contact_email] = rows[0].id;
