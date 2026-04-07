@@ -9,7 +9,7 @@
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "jest --config ./jest.unit.config.js --runInBand --detectOpenHandles",
     "test:integration": "jest --config ./jest.integration.config.js --runInBand --detectOpenHandles",
-    "db:seed": "docker exec -i clubhub-db psql -U postgres -d clubhub < src/database/seeds/pfw_clubs.sql"
+    "db:seed": "node src/database/seeds/seed.js"
   },
   "keywords": [],
   "author": "",
