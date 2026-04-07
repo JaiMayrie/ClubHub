@@ -246,6 +246,12 @@ exports.createClub = async (req, res) => {
 
     const club = result.rows[0];
 
+    // Add the admin as a member of their own club
+    await db.query(
+      "INSERT INTO memberships (user_id, club_id) VALUES ($1, $2)",
+      [req.userId, club.id],
+    );
+
     // ========== SUCCESS RESPONSE ==========
     res.status(201).json({
       message: "Club created successfully",
@@ -315,11 +321,9 @@ exports.getClubJoinRequests = async (req, res) => {
     }
 
     if (clubCheck.rows[0].admin_id !== userId) {
-      return res
-        .status(403)
-        .json({
-          error: "You are not authorized to view requests for this club",
-        });
+      return res.status(403).json({
+        error: "You are not authorized to view requests for this club",
+      });
     }
 
     // Get pending join requests with user information
@@ -375,11 +379,9 @@ exports.updateClub = async (req, res) => {
       "Special Interest",
     ];
     if (category && !validCategories.includes(category)) {
-      return res
-        .status(400)
-        .json({
-          error: `Invalid category. Must be one of: ${validCategories.join(", ")}`,
-        });
+      return res.status(400).json({
+        error: `Invalid category. Must be one of: ${validCategories.join(", ")}`,
+      });
     }
     if (contact_email) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

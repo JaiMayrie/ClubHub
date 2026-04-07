@@ -1577,13 +1577,19 @@ async function seed() {
       ],
     );
     clubIdByContactEmail[rows[0].contact_email] = rows[0].id;
+
+    // Add the admin as a member of their own club
+    await db.query(
+      "INSERT INTO memberships (user_id, club_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+      [adminId, rows[0].id],
+    );
   }
   console.log(`  Inserted ${clubs.length} clubs.`);
 
   // Insert memberships
   for (const m of memberships) {
     await db.query(
-      "INSERT INTO memberships (user_id, club_id) VALUES ($1, $2)",
+      "INSERT INTO memberships (user_id, club_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
       [userIdByEmail[m.userEmail], clubIdByContactEmail[m.clubContactEmail]],
     );
   }
