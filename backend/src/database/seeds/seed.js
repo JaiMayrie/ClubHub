@@ -919,56 +919,6 @@ const clubs = [
     memberCount: 26,
   },
   {
-    name: "International Student Organization",
-    category: "Special Interest",
-    description:
-      "The International Student Organization provides support, brings students together, and embraces customs, traditions, and values from around the world.",
-    meetingInfo: "Monthly meetings - Walb Student Union 210",
-    contactEmail: "iso2@pfw.edu",
-    adminEmail: "sreyes@pfw.edu",
-    memberCount: 29,
-  },
-  {
-    name: "Sociology Student Association",
-    category: "Academic",
-    description:
-      "The Sociology Student Association helps students explore sociology, connect with fellow sociology students, and build a supportive academic community.",
-    meetingInfo: "Bi-weekly Tuesdays, 5:30 PM - Liberal Arts Building 215",
-    contactEmail: "sociology@pfw.edu",
-    adminEmail: "ebrooks@pfw.edu",
-    memberCount: 16,
-  },
-  {
-    name: "Model United Nations",
-    category: "Academic",
-    description:
-      "Model United Nations gives students the opportunity to participate in simulations and learn about United Nations international politics.",
-    meetingInfo: "Weekly Thursdays, 6:00 PM - Liberal Arts Building 200",
-    contactEmail: "modelun@pfw.edu",
-    adminEmail: "zahmed@pfw.edu",
-    memberCount: 18,
-  },
-  {
-    name: "Human Services Organization",
-    category: "Service",
-    description:
-      "The Human Services Organization helps students develop real-world skills through volunteer opportunities, networking, and guest-speaking events.",
-    meetingInfo: "Every other Wednesday, 5:00 PM - Walb Student Union 214",
-    contactEmail: "hso2@pfw.edu",
-    adminEmail: "ncarter@pfw.edu",
-    memberCount: 20,
-  },
-  {
-    name: "Military Science and Leadership Club",
-    category: "Service",
-    description:
-      "The Military Science and Leadership Club supports community-service projects and military-related events and helps students build leadership through service.",
-    meetingInfo: "Bi-weekly Mondays, 6:00 PM - Walb Student Union 220",
-    contactEmail: "armyrotc@pfw.edu",
-    adminEmail: "imartin@pfw.edu",
-    memberCount: 14,
-  },
-  {
     name: "MEDLIFE",
     category: "Service",
     description:
