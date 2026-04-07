@@ -1218,10 +1218,25 @@ const memberships = [
   // Sam Torres
   { userEmail: "storres@student.pfw.edu", clubContactEmail: "acm@pfw.edu" },
   { userEmail: "storres@student.pfw.edu", clubContactEmail: "esports@pfw.edu" },
+  { userEmail: "storres@student.pfw.edu", clubContactEmail: "gamedev@pfw.edu" },
+  {
+    userEmail: "storres@student.pfw.edu",
+    clubContactEmail: "codingprep@pfw.edu",
+  },
+  {
+    userEmail: "storres@student.pfw.edu",
+    clubContactEmail: "tabletop@pfw.edu",
+  },
   // Mia Chen
   { userEmail: "mchen@student.pfw.edu", clubContactEmail: "amsa@pfw.edu" },
   { userEmail: "mchen@student.pfw.edu", clubContactEmail: "bioclub@pfw.edu" },
   { userEmail: "mchen@student.pfw.edu", clubContactEmail: "tribeta@pfw.edu" },
+  { userEmail: "mchen@student.pfw.edu", clubContactEmail: "prehealth@pfw.edu" },
+  { userEmail: "mchen@student.pfw.edu", clubContactEmail: "yoga@pfw.edu" },
+  {
+    userEmail: "mchen@student.pfw.edu",
+    clubContactEmail: "activeminds@pfw.edu",
+  },
   // Jake Murphy
   {
     userEmail: "jmurphy@student.pfw.edu",
@@ -1231,6 +1246,12 @@ const memberships = [
     userEmail: "jmurphy@student.pfw.edu",
     clubContactEmail: "activeminds@pfw.edu",
   },
+  {
+    userEmail: "jmurphy@student.pfw.edu",
+    clubContactEmail: "ballanalytics@pfw.edu",
+  },
+  { userEmail: "jmurphy@student.pfw.edu", clubContactEmail: "soccer@pfw.edu" },
+  { userEmail: "jmurphy@student.pfw.edu", clubContactEmail: "sab@pfw.edu" },
   // Nia Jackson
   { userEmail: "njackson@student.pfw.edu", clubContactEmail: "bsu@pfw.edu" },
   {
@@ -1238,6 +1259,15 @@ const memberships = [
     clubContactEmail: "activeminds@pfw.edu",
   },
   { userEmail: "njackson@student.pfw.edu", clubContactEmail: "aso@pfw.edu" },
+  {
+    userEmail: "njackson@student.pfw.edu",
+    clubContactEmail: "generationaction@pfw.edu",
+  },
+  {
+    userEmail: "njackson@student.pfw.edu",
+    clubContactEmail: "volunteer@pfw.edu",
+  },
+  { userEmail: "njackson@student.pfw.edu", clubContactEmail: "sga@pfw.edu" },
   // Leo Fischer
   { userEmail: "lfischer@student.pfw.edu", clubContactEmail: "acm@pfw.edu" },
   {
@@ -1248,6 +1278,12 @@ const memberships = [
     userEmail: "lfischer@student.pfw.edu",
     clubContactEmail: "accountingsociety@pfw.edu",
   },
+  {
+    userEmail: "lfischer@student.pfw.edu",
+    clubContactEmail: "financeclub@pfw.edu",
+  },
+  { userEmail: "lfischer@student.pfw.edu", clubContactEmail: "invest@pfw.edu" },
+  { userEmail: "lfischer@student.pfw.edu", clubContactEmail: "data@pfw.edu" },
   // Hannah Scott
   {
     userEmail: "hscott@student.pfw.edu",
@@ -1258,12 +1294,21 @@ const memberships = [
     userEmail: "hscott@student.pfw.edu",
     clubContactEmail: "anthroclub@pfw.edu",
   },
+  { userEmail: "hscott@student.pfw.edu", clubContactEmail: "bookclub@pfw.edu" },
+  { userEmail: "hscott@student.pfw.edu", clubContactEmail: "theatre@pfw.edu" },
+  { userEmail: "hscott@student.pfw.edu", clubContactEmail: "debate@pfw.edu" },
   // Devin Moore
   {
     userEmail: "dmoore@student.pfw.edu",
     clubContactEmail: "basketballclub@pfw.edu",
   },
   { userEmail: "dmoore@student.pfw.edu", clubContactEmail: "esports@pfw.edu" },
+  {
+    userEmail: "dmoore@student.pfw.edu",
+    clubContactEmail: "ballanalytics@pfw.edu",
+  },
+  { userEmail: "dmoore@student.pfw.edu", clubContactEmail: "cyber@pfw.edu" },
+  { userEmail: "dmoore@student.pfw.edu", clubContactEmail: "fitness@pfw.edu" },
   // Fatima Ali
   { userEmail: "fali@student.pfw.edu", clubContactEmail: "msa@pfw.edu" },
   { userEmail: "fali@student.pfw.edu", clubContactEmail: "bsa@pfw.edu" },
@@ -1271,13 +1316,25 @@ const memberships = [
     userEmail: "fali@student.pfw.edu",
     clubContactEmail: "activeminds@pfw.edu",
   },
+  { userEmail: "fali@student.pfw.edu", clubContactEmail: "iso@pfw.edu" },
+  { userEmail: "fali@student.pfw.edu", clubContactEmail: "volunteer@pfw.edu" },
+  { userEmail: "fali@student.pfw.edu", clubContactEmail: "wellness@pfw.edu" },
   // Ryan Bell
   { userEmail: "rbell@student.pfw.edu", clubContactEmail: "asce@pfw.edu" },
   { userEmail: "rbell@student.pfw.edu", clubContactEmail: "acm@pfw.edu" },
+  { userEmail: "rbell@student.pfw.edu", clubContactEmail: "robotics@pfw.edu" },
+  { userEmail: "rbell@student.pfw.edu", clubContactEmail: "cyber@pfw.edu" },
+  { userEmail: "rbell@student.pfw.edu", clubContactEmail: "techinnov@pfw.edu" },
   // Grace Liu
   { userEmail: "gliu@student.pfw.edu", clubContactEmail: "amsa@pfw.edu" },
   { userEmail: "gliu@student.pfw.edu", clubContactEmail: "asmicro@pfw.edu" },
   { userEmail: "gliu@student.pfw.edu", clubContactEmail: "tribeta@pfw.edu" },
+  { userEmail: "gliu@student.pfw.edu", clubContactEmail: "bioclub@pfw.edu" },
+  {
+    userEmail: "gliu@student.pfw.edu",
+    clubContactEmail: "prepharmacy@pfw.edu",
+  },
+  { userEmail: "gliu@student.pfw.edu", clubContactEmail: "chemclub@pfw.edu" },
 ];
 
 // ============================================
