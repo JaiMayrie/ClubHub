@@ -179,11 +179,20 @@ export const membersAPI = {
   },
 
 };
-  export const eventsAPI = {
-    getAll: async () => {
-      const response = await api.get("/events");
-      return response.data;
-    },
-};
+export const eventsAPI = {
+  getRecent: async () => {
+    const response = await api.get("/events/recent");
+    return response.data;
+  },
 
+  getForClub: async (clubId) => {
+    const response = await api.get(`/events/club/${clubId}`);
+    return response.data;
+  },
+
+  create: async (eventData) => {
+    const response = await api.post("/events", eventData);
+    return response.data;
+  },
+};
 export default api;

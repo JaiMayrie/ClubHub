@@ -1,3 +1,4 @@
+
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
@@ -11,6 +12,8 @@ require("dotenv").config();
 
 const path = require("path");
 const fs = require("fs");
+
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -72,6 +75,7 @@ app.use("/api/join-requests", joinRequestRoutes);
 
 // Membership routes
 app.use("/api/memberships", membershipRoutes);
+
 
 // 404 handler — catches any route that didn't match above
 app.use((req, res) => {

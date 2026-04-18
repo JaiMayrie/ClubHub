@@ -6,7 +6,7 @@ DROP TABLE IF EXISTS join_requests;
 DROP TABLE IF EXISTS memberships;
 DROP TABLE IF EXISTS clubs;
 DROP TABLE IF EXISTS users;
-
+DROP INDEX IF EXISTS events;
 -- ============================================
 -- USERS TABLE
 -- ============================================
@@ -77,6 +77,14 @@ CREATE TABLE join_requests (
   status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(user_id, club_id)
+CREATE TABLE events (
+  id SERIAL PRIMARY KEY,
+  club_id INTEGER NOT NULL REFERENCES clubs(id) ON DELETE CASCADE,
+  name VARCHAR(150) NOT NULL,
+  description TEXT NOT NULL,
+  event_date TIMESTAMP NOT NULL,
+  location VARCHAR(255),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Index for faster admin queries (get all requests for a club)
@@ -99,3 +107,6 @@ CREATE INDEX idx_join_requests_pending ON join_requests(club_id, status) WHERE s
 
 -- Index for memberships by user (speeds up my-memberships endpoint)
 CREATE INDEX idx_memberships_user_id ON memberships(user_id);
+
+CREATE INDEX idx_events_club_id ON events(club_id);
+CREATE INDEX idx_events_starts_at ON events(starts_at);
