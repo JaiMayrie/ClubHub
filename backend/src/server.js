@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
-console.log("🔥 THIS IS THE SERVER FILE RUNNING");
 
 /**
  * Main Server Entry Point
