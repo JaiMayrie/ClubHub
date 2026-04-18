@@ -129,6 +129,50 @@ function BrowseClubsPage() {
       </main>
     </div>
   );
+{clubs.map((club) => {
+  const visual = getClubVisual(club);
+
+  return (
+    <div
+      key={club.id}
+      className="overflow-hidden bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300"
+    >
+      <div className="relative h-44">
+        <img
+          src={visual.image}
+          alt={`${club.name} cover`}
+          className="w-full h-full object-cover"
+        />
+        <div
+          className={`absolute inset-0 bg-gradient-to-t ${visual.accent} opacity-70`}
+          aria-hidden="true"
+        />
+        <div className="absolute bottom-4 left-4 right-4 text-white">
+          <span className="inline-block bg-white/20 backdrop-blur px-3 py-1 rounded-full text-xs font-semibold mb-2">
+            {club.category}
+          </span>
+          <h3 className="text-xl font-bold leading-tight">{club.name}</h3>
+        </div>
+      </div>
+
+      <div className="p-5">
+        <div className="flex items-center justify-between text-sm text-gray-600 mb-3">
+          <span>{club.member_count} members</span>
+          {club.admin_name && <span>Led by {club.admin_name}</span>}
+        </div>
+
+        <p className="text-gray-700 mb-4 line-clamp-3">{club.description}</p>
+
+        <Link
+          to={`/clubs/${club.id}`}
+          className="block w-full text-center bg-purdue-gold text-black py-2.5 rounded-lg font-semibold hover:bg-purdue-gold-dark transition-colors"
+        >
+          View Club
+        </Link>
+      </div>
+    </div>
+  );
+})}
 }
 
 export default BrowseClubsPage;

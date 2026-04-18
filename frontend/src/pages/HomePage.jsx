@@ -4,6 +4,23 @@ import { useAuth } from "../hooks/useAuth";
 import NavHeader from "../components/NavHeader";
 import { clubsAPI } from "../services/api";
 
+const sampleEvents = [
+  {
+    id: 1,
+    title: "Spring Club Fair",
+    date: "2026-04-20",
+    location: "Walb Union",
+    image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80"
+  },
+    { 
+      id: 2,
+      title: "Coding Night",
+      date: "2026-05-10",
+      location: "Computer Science Building",
+      image: "https://images.unsplash.com/photo-1555066931-4365d14b8c16?auto=format&fit=crop&w=800&q=80"
+    }
+  ];
+
 function HomePage() {
   const { user } = useAuth();
   const [featuredClubs, setFeaturedClubs] = useState([]);

@@ -177,6 +177,13 @@ export const membersAPI = {
     const response = await api.delete(`/clubs/${clubId}/members/${userId}`);
     return response.data;
   },
+
+};
+  export const eventsAPI = {
+    getAll: async () => {
+      const response = await api.get("/events");
+      return response.data;
+    },
 };
 
 export default api;

@@ -41,12 +41,15 @@ function ClubDetailPage() {
           membershipsAPI.getMy(),
           joinRequestsAPI.getMy(),
         ]);
+
         const isMember = memberships.memberships.some(
           (m) => m.club_id === parseInt(id),
         );
+
         const hasPending = requests.requests.some(
           (r) => r.club_id === parseInt(id) && r.status === "pending",
         );
+
         if (isMember) {
           setUserStatus("member");
         } else if (hasPending) {
@@ -56,24 +59,29 @@ function ClubDetailPage() {
         console.error("Error checking user status:", err);
       }
     };
+
     checkUserStatus();
   }, [id, user]);
 
   const handleJoinRequest = async (e) => {
     e.preventDefault();
+
     if (!user) {
       navigate("/login");
       return;
     }
+
     setSubmitting(true);
     setError("");
     setSuccess("");
+
     try {
       await joinRequestsAPI.submit(id, joinMessage);
       setUserStatus("pending");
       setJoinMessage("");
     } catch (err) {
       const msg = err.response?.data?.error || "Failed to submit join request";
+
       if (msg.includes("already a member")) {
         setUserStatus("member");
       } else if (msg.includes("already have a pending")) {
@@ -166,7 +174,6 @@ function ClubDetailPage() {
             )}
           </div>
 
-          {/* View members button */}
           {(isOwner || userStatus === "member") && (
             <div className="mt-1 pt-2 border-t-2 border-gray-200">
               <Link
