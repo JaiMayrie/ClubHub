@@ -67,7 +67,7 @@ function BrowseClubsPage() {
             value={category || "All Categories"}
             onChange={(e) =>
               setCategory(
-                e.target.value === "All Categories" ? "" : e.target.value
+                e.target.value === "All Categories" ? "" : e.target.value,
               )
             }
             aria-label="Filter by category"
@@ -112,6 +112,9 @@ function BrowseClubsPage() {
                       src={visual.image}
                       alt={`${club.name} cover`}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
                     />
                     <div
                       className={`absolute inset-0 bg-gradient-to-t ${visual.accent} opacity-70`}
