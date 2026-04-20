@@ -63,6 +63,7 @@ const authRoutes = require("./routes/auth");
 const clubRoutes = require("./routes/clubs");
 const joinRequestRoutes = require("./routes/joinRequests");
 const membershipRoutes = require("./routes/memberships");
+const eventRoutes = require("./routes/events");
 
 // Auth routes
 app.use("/api/auth", authRoutes);
@@ -75,6 +76,9 @@ app.use("/api/join-requests", joinRequestRoutes);
 
 // Membership routes
 app.use("/api/memberships", membershipRoutes);
+
+// Event routes
+app.use("/api/events", eventRoutes);
 
 
 // 404 handler — catches any route that didn't match above

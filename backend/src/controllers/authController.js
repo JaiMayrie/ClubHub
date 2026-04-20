@@ -137,7 +137,7 @@ exports.login = async (req, res) => {
 exports.getMe = async (req, res) => {
   try {
     const result = await db.query(
-      "SELECT id, name, email, role FROM users WHERE id = $1",
+      "SELECT id, name, email, role, avatar_url FROM users WHERE id = $1",
       [req.userId],
     );
 

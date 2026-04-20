@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import UserAvatar from "./UserAvatar";
 
 function NavHeader({ backTo, backLabel = "← Back to Home" }) {
   const { user, logout } = useAuth();
@@ -62,6 +63,13 @@ function NavHeader({ backTo, backLabel = "← Back to Home" }) {
                     className="text-white hover:text-purdue-gold transition-colors font-medium"
                   >
                     Profile
+                  </Link>
+                  <Link to="/profile" aria-label="Your profile">
+                    <UserAvatar
+                      name={user.name}
+                      avatarUrl={user.avatar_url}
+                      size="sm"
+                    />
                   </Link>
                   <button
                     onClick={handleLogout}

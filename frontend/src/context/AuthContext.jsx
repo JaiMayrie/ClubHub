@@ -142,6 +142,10 @@ export function AuthProvider({ children }) {
     clearAuth();
   }, [clearAuth]);
 
+  const updateUser = useCallback((updatedFields) => {
+    setUser((prev) => (prev ? { ...prev, ...updatedFields } : prev));
+  }, []);
+
   const value = useMemo(
     () => ({
       token,
@@ -151,8 +155,9 @@ export function AuthProvider({ children }) {
       login,
       register,
       logout,
+      updateUser,
     }),
-    [token, user, isLoading, login, register, logout],
+    [token, user, isLoading, login, register, logout, updateUser],
   );
 
   console.log("🔍 AuthContext render - isLoading:", isLoading, "user:", user);

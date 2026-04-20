@@ -2,8 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import NavHeader from "../components/NavHeader";
 import { authAPI } from "../services/api";
 import UserAvatar from "../components/UserAvatar";
+import { useAuth } from "../hooks/useAuth";
 
 function ProfilePage() {
+  const { updateUser } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [profileForm, setProfileForm] = useState({
@@ -72,6 +74,7 @@ function ProfilePage() {
         year: profileForm.year,
       });
       setProfile(data.user);
+      updateUser(data.user);
       setProfileForm((f) => ({
         ...f,
         saving: false,

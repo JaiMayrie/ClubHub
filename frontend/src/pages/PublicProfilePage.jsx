@@ -62,6 +62,12 @@ function PublicProfilePage() {
     <div className="min-h-screen bg-gray-50">
       <NavHeader />
       <main className="container mx-auto px-4 py-8 max-w-2xl">
+        <button
+          onClick={() => navigate(-1)}
+          className="mb-6 text-gray-600 hover:text-purdue-gold transition-colors font-medium"
+        >
+          ← Back
+        </button>
         {/* Header card */}
         <div className="bg-white border-2 border-gray-200 rounded-lg p-6 mb-6">
           <div className="flex items-center gap-5">

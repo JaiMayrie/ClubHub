@@ -4,9 +4,9 @@
 -- Drop tables if they exist (for clean setup)
 DROP TABLE IF EXISTS join_requests;
 DROP TABLE IF EXISTS memberships;
+DROP TABLE IF EXISTS events;
 DROP TABLE IF EXISTS clubs;
 DROP TABLE IF EXISTS users;
-DROP INDEX IF EXISTS events;
 -- ============================================
 -- USERS TABLE
 -- ============================================
@@ -77,6 +77,8 @@ CREATE TABLE join_requests (
   status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(user_id, club_id)
+);
+
 CREATE TABLE events (
   id SERIAL PRIMARY KEY,
   club_id INTEGER NOT NULL REFERENCES clubs(id) ON DELETE CASCADE,
@@ -109,4 +111,4 @@ CREATE INDEX idx_join_requests_pending ON join_requests(club_id, status) WHERE s
 CREATE INDEX idx_memberships_user_id ON memberships(user_id);
 
 CREATE INDEX idx_events_club_id ON events(club_id);
-CREATE INDEX idx_events_starts_at ON events(starts_at);
+CREATE INDEX idx_events_event_date ON events(event_date);

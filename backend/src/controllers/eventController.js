@@ -10,8 +10,8 @@ exports.getRecentEvents = async (req, res) => {
         clubs.category AS club_category
       FROM events
       JOIN clubs ON events.club_id = clubs.id
-      WHERE events.starts_at >= NOW() - INTERVAL '30 days'
-      ORDER BY events.starts_at ASC
+      WHERE events.event_date >= NOW() - INTERVAL '30 days'
+      ORDER BY events.event_date ASC
       LIMIT 20
       `
     );
@@ -32,7 +32,7 @@ exports.getEventsForClub = async (req, res) => {
       SELECT *
       FROM events
       WHERE club_id = $1
-      ORDER BY starts_at ASC
+      ORDER BY event_date ASC
       `,
       [clubId]
     );
@@ -46,24 +46,21 @@ exports.getEventsForClub = async (req, res) => {
 
 exports.createEvent = async (req, res) => {
   try {
-    const { club_id, title, description, location, starts_at, ends_at, image_url } = req.body;
+    const { club_id, name, description, location, event_date } = req.body;
 
     const result = await db.query(
       `
       INSERT INTO events
-      (club_id, title, description, location, starts_at, ends_at, image_url, created_by)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      (club_id, name, description, location, event_date)
+      VALUES ($1, $2, $3, $4, $5)
       RETURNING *
       `,
       [
         club_id,
-        title,
+        name,
         description || "",
         location || "",
-        starts_at,
-        ends_at || null,
-        image_url || "",
-        req.userId,
+        event_date,
       ]
     );
 
