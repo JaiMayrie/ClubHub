@@ -53,7 +53,7 @@ function ClubMembersPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <NavHeader backTo="/dashboard" backLabel="← Back to Dashboard" />
+      <NavHeader backTo={`/clubs/${id}`} backLabel="← Back to Club" />
       <main className="container mx-auto px-4 py-8 max-w-3xl">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">{data?.club_name}</h1>
