@@ -51,11 +51,11 @@ function ClubDetailPage() {
         ]);
 
         const isMember = memberships.memberships.some(
-          (m) => m.club_id === parseInt(id)
+          (m) => m.club_id === parseInt(id),
         );
 
         const hasPending = requests.requests.some(
-          (r) => r.club_id === parseInt(id) && r.status === "pending"
+          (r) => r.club_id === parseInt(id) && r.status === "pending",
         );
 
         if (isMember) {
@@ -124,6 +124,9 @@ function ClubDetailPage() {
                 src={clubVisual.image}
                 alt="Club banner placeholder"
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                }}
               />
               <div
                 className={`absolute inset-0 bg-gradient-to-t ${clubVisual.accent} opacity-75`}
@@ -177,6 +180,9 @@ function ClubDetailPage() {
               src={visual.image}
               alt={`${club.name} banner`}
               className="w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
             />
             <div
               className={`absolute inset-0 bg-gradient-to-t ${visual.accent} opacity-75`}
@@ -247,6 +253,9 @@ function ClubDetailPage() {
                           src={event.image_url}
                           alt={event.title}
                           className="w-full h-44 object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                          }}
                         />
                       )}
 
@@ -260,9 +269,13 @@ function ClubDetailPage() {
                           </span>
                         </div>
 
-                        <h3 className="text-lg font-bold mb-2">{event.title}</h3>
+                        <h3 className="text-lg font-bold mb-2">
+                          {event.title}
+                        </h3>
                         {event.description && (
-                          <p className="text-gray-700 mb-3">{event.description}</p>
+                          <p className="text-gray-700 mb-3">
+                            {event.description}
+                          </p>
                         )}
                         {event.location && (
                           <p className="text-sm text-gray-600">
@@ -293,8 +306,8 @@ function ClubDetailPage() {
                   {isOwner
                     ? "Your Club"
                     : userStatus === "member"
-                    ? "You are a member"
-                    : "Request to Join"}
+                      ? "You are a member"
+                      : "Request to Join"}
                 </h2>
 
                 {(isOwner || userStatus === "member") && (
