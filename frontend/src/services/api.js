@@ -195,4 +195,15 @@ export const eventsAPI = {
     return response.data;
   },
 };
+
+// ============================================
+// RECOMMENDATIONS API
+// ============================================
+export const recommendationsAPI = {
+  getSuggestions: async () => {
+    const response = await api.get("/recommendations");
+    return response.data;
+  },
+};
+
 export default api;
