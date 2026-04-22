@@ -2,8 +2,9 @@ const db = require("../db");
 
 /**
  * GET /api/recommendations
- * Returns 3-5 AI-suggested clubs for the logged-in student
- * based on their major, year, bio, and clubs already joined.
+ * Returns 3–5 AI-suggested clubs for the logged-in student.
+ * Uses Google Gemini API (free tier).
+ * Response shape per club: { club_name, category, reason }
  */
 exports.getRecommendations = async (req, res) => {
   try {
@@ -14,105 +15,107 @@ exports.getRecommendations = async (req, res) => {
       "SELECT name, major, year, bio FROM users WHERE id = $1",
       [userId]
     );
-
     if (userResult.rows.length === 0) {
       return res.status(404).json({ error: "User not found" });
     }
-
     const user = userResult.rows[0];
 
-    // 2. Fetch clubs user is already in
-    const membershipResult = await db.query(
+    // 2. Clubs the user already joined
+    const joinedResult = await db.query(
       `SELECT clubs.name FROM memberships
        JOIN clubs ON memberships.club_id = clubs.id
        WHERE memberships.user_id = $1`,
       [userId]
     );
-    const joinedClubNames = membershipResult.rows.map((r) => r.name);
+    const joinedNames = joinedResult.rows.map((r) => r.name);
 
-    // 3. Fetch all clubs (excluding ones already joined)
+    // 3. All other available clubs
     const clubsResult = await db.query(
-      `SELECT clubs.name, clubs.category, clubs.description
+      `SELECT name, category, description
        FROM clubs
-       WHERE clubs.id NOT IN (
+       WHERE id NOT IN (
          SELECT club_id FROM memberships WHERE user_id = $1
        )
-       ORDER BY clubs.name ASC`,
+       ORDER BY name ASC`,
       [userId]
     );
+    const available = clubsResult.rows;
 
-    const availableClubs = clubsResult.rows;
-
-    if (availableClubs.length === 0) {
+    if (available.length === 0) {
       return res.json({ recommendations: [] });
     }
 
-    // 4. Build prompt for Claude
-    const userContext = [
-      user.major ? `Major: ${user.major}` : null,
-      user.year ? `Year: ${user.year}` : null,
-      user.bio ? `Bio: "${user.bio}"` : null,
-      joinedClubNames.length > 0
-        ? `Already in: ${joinedClubNames.join(", ")}`
-        : null,
-    ]
-      .filter(Boolean)
-      .join("\n");
+    // 4. Build prompt
+    const profileLines = [
+      user.major ? `Major: ${user.major}`                     : null,
+      user.year  ? `Year: ${user.year}`                       : null,
+      user.bio   ? `Bio: "${user.bio}"`                       : null,
+      joinedNames.length
+        ? `Already joined: ${joinedNames.join(", ")}`         : null,
+    ].filter(Boolean).join("\n");
 
-    const clubsList = availableClubs
+    const clubList = available
       .map((c) => `- ${c.name} (${c.category}): ${c.description}`)
       .join("\n");
 
-    const prompt = `You are a helpful university club advisor at Purdue Fort Wayne.
+    const prompt = `You are a helpful club advisor at Purdue Fort Wayne university.
 
 Student profile:
-${userContext || "No profile info provided yet."}
+${profileLines || "No profile info provided yet."}
 
-Available clubs the student has NOT joined yet:
-${clubsList}
+Clubs available to join:
+${clubList}
 
-Based on the student's profile, recommend exactly 3 to 5 clubs that would be the best fit.
-Return ONLY a JSON array with no extra text, markdown, or explanation outside the JSON.
-Format:
+Recommend exactly 3 to 5 clubs that best fit this student based on their profile.
+Return ONLY a raw JSON array — no markdown, no code fences, no explanation outside the JSON.
+Each item must have exactly these three keys:
+  "club_name"  — the exact club name from the list above
+  "category"   — the club category
+  "reason"     — one sentence explaining why it suits this student
+
+Example:
 [
-  {
-    "club_name": "Exact Club Name",
-    "category": "Category",
-    "reason": "One sentence explaining why this club fits this student."
-  }
+  { "club_name": "Robotics Club", "category": "Academic", "reason": "Matches your CS major and interest in building things." }
 ]`;
 
-    // 5. Call Claude API
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+    // 5. Call Gemini API (free tier — gemini-1.5-flash)
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
+
+    const geminiResponse = await fetch(geminiUrl, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 1024,
-        messages: [{ role: "user", content: prompt }],
+        contents: [
+          {
+            parts: [{ text: prompt }],
+          },
+        ],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 1024,
+        },
       }),
     });
 
-    if (!response.ok) {
-      const err = await response.text();
-      console.error("Claude API error:", err);
+    if (!geminiResponse.ok) {
+      const errText = await geminiResponse.text();
+      console.error("Gemini API error:", errText);
       return res.status(502).json({ error: "AI service unavailable" });
     }
 
-    const aiData = await response.json();
-    const rawText = aiData.content?.[0]?.text || "[]";
+    const geminiData = await geminiResponse.json();
 
-    // 6. Parse JSON safely
+    // Extract text from Gemini response structure
+    const rawText =
+      geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
+
+    // 6. Parse safely — strip any accidental markdown fences
     let recommendations = [];
     try {
       const cleaned = rawText.replace(/```json|```/g, "").trim();
       recommendations = JSON.parse(cleaned);
-    } catch (parseErr) {
-      console.error("Failed to parse AI response:", rawText);
+    } catch {
+      console.error("Failed to parse Gemini response:", rawText);
       return res.status(502).json({ error: "Failed to parse AI response" });
     }
 
