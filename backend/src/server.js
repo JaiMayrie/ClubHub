@@ -13,8 +13,6 @@ require("dotenv").config();
 const path = require("path");
 const fs = require("fs");
 
-
-
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -64,6 +62,7 @@ const clubRoutes = require("./routes/clubs");
 const joinRequestRoutes = require("./routes/joinRequests");
 const membershipRoutes = require("./routes/memberships");
 const eventRoutes = require("./routes/events");
+const recommendationRoutes = require("./routes/recommendations");
 
 // Auth routes
 app.use("/api/auth", authRoutes);
@@ -80,6 +79,7 @@ app.use("/api/memberships", membershipRoutes);
 // Event routes
 app.use("/api/events", eventRoutes);
 
+app.use("/api/recommendations", recommendationRoutes);
 
 // 404 handler — catches any route that didn't match above
 app.use((req, res) => {
