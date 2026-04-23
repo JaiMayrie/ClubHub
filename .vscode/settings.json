@@ -4,5 +4,6 @@
   "jest.runMode": {
     "type": "on-demand",
     "testFileOnly": true
-  }
+  },
+  "postman.settings.dotenv-detection-notification-visibility": false
 }
