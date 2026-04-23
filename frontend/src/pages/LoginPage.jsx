@@ -14,6 +14,9 @@ function LoginPage() {
 
   const from = location.state?.from?.pathname ?? "/dashboard";
 
+  // Show a success banner if redirected here from registration
+  const justRegistered = location.state?.registered === true;
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
@@ -33,12 +36,31 @@ function LoginPage() {
     <div className="min-h-screen bg-gray-50">
       <NavHeader backTo="/" />
 
-      {/* Main Content */}
       <main className="container mx-auto px-4 py-16 max-w-md">
         <div className="bg-white rounded-lg shadow-lg p-8">
           <h1 className="text-3xl font-bold text-center mb-8">
             Login to ClubHub
           </h1>
+
+          {/* Success banner — shown when redirected from registration */}
+          {justRegistered && (
+            <div className="bg-green-50 border-2 border-green-200 text-green-800 px-4 py-3 rounded mb-6 flex items-center gap-2">
+              <svg
+                className="w-5 h-5 text-green-600 flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+              Account created successfully! Please log in.
+            </div>
+          )}
 
           {/* Error Message */}
           {error && (

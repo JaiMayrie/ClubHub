@@ -124,12 +124,9 @@ export function AuthProvider({ children }) {
       if (!response.ok) {
         throw new Error(data.error ?? "Registration failed");
       }
-
-      console.log("✅ Registration successful");
-      localStorage.setItem(TOKEN_KEY, data.token);
-      setToken(data.token);
-      setUser(data.user ?? null);
-
+      
+      console.log("✅ Registration successful — redirecting to login");
+      // Do NOT store token or log the user in automatically
       return data;
     } catch (error) {
       console.error("❌ Registration error:", error);
