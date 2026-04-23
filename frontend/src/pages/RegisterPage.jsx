@@ -3,12 +3,46 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import NavHeader from "../components/NavHeader";
 
+// Password rules — single source of truth for frontend validation
+const PASSWORD_RULES = [
+  {
+    id: "length",
+    label: "At least 8 characters",
+    test: (pw) => pw.length >= 8,
+  },
+  {
+    id: "uppercase",
+    label: "One uppercase letter (A-Z)",
+    test: (pw) => /[A-Z]/.test(pw),
+  },
+  {
+    id: "lowercase",
+    label: "One lowercase letter (a-z)",
+    test: (pw) => /[a-z]/.test(pw),
+  },
+  {
+    id: "number",
+    label: "One number (0-9)",
+    test: (pw) => /[0-9]/.test(pw),
+  },
+  {
+    id: "special",
+    label: "One special character (!@#$%^&*...)",
+    test: (pw) => /[^A-Za-z0-9]/.test(pw),
+  },
+];
+
+function isPasswordValid(pw) {
+  return PASSWORD_RULES.every((rule) => rule.test(pw));
+}
+
 function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordTouched, setPasswordTouched] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -16,13 +50,18 @@ function RegisterPage() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
-    setLoading(true);
 
+    // Frontend guard — catch weak passwords before hitting the API
+    if (!isPasswordValid(password)) {
+      setError("Please make sure your password meets all the requirements below.");
+      setPasswordTouched(true);
+      return;
+    }
+
+    setLoading(true);
     try {
       await register({ name, email, password });
-      // Show success state — do NOT navigate yet
       setSuccess(true);
-      // Redirect to login after 3 seconds
       setTimeout(() => {
         navigate("/login", { replace: true });
       }, 3000);
@@ -40,7 +79,6 @@ function RegisterPage() {
         <NavHeader backTo="/" />
         <main className="container mx-auto px-4 py-16 max-w-md">
           <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-            {/* Green check icon */}
             <div className="flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mx-auto mb-4">
               <svg
                 className="w-8 h-8 text-green-600"
@@ -56,7 +94,6 @@ function RegisterPage() {
                 />
               </svg>
             </div>
-
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
               Account Created!
             </h1>
@@ -67,7 +104,6 @@ function RegisterPage() {
             <p className="text-gray-500 text-sm mb-6">
               Redirecting you to login in a moment...
             </p>
-
             <Link
               to="/login"
               className="inline-block w-full bg-purdue-gold text-black py-3 rounded-lg font-bold text-lg hover:bg-purdue-gold-dark transition-colors"
@@ -94,24 +130,25 @@ function RegisterPage() {
           {/* Error Message */}
           {error && (
             <div className="bg-red-50 border-2 border-red-200 text-red-800 px-4 py-3 rounded mb-6">
-              {error === "Email already registered"
-                ? `The email address you entered is already in use. Please use a different email or `
-                : error}
-              {error === "Email already registered" && (
-                <Link
-                  to="/login"
-                  className="font-semibold underline hover:text-red-900"
-                >
-                  log in instead
-                </Link>
+              {error === "Email already registered" ? (
+                <>
+                  That email is already in use. Please use a different email or{" "}
+                  <Link
+                    to="/login"
+                    className="font-semibold underline hover:text-red-900"
+                  >
+                    log in instead
+                  </Link>
+                  .
+                </>
+              ) : (
+                error
               )}
-              {error === "Email already registered" && "."}
             </div>
           )}
 
-          {/* Registration Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Name Input */}
+            {/* Name */}
             <div>
               <label
                 htmlFor="name"
@@ -124,13 +161,13 @@ function RegisterPage() {
                 type="text"
                 placeholder="John Doe"
                 value={name}
-                onChange={(event) => setName(event.target.value)}
+                onChange={(e) => setName(e.target.value)}
                 required
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purdue-gold focus:outline-none transition-colors"
               />
             </div>
 
-            {/* Email Input */}
+            {/* Email */}
             <div>
               <label
                 htmlFor="email"
@@ -143,13 +180,13 @@ function RegisterPage() {
                 type="email"
                 placeholder="your.email@purdue.edu"
                 value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
                 required
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purdue-gold focus:outline-none transition-colors"
               />
             </div>
 
-            {/* Password Input */}
+            {/* Password */}
             <div>
               <label
                 htmlFor="password"
@@ -160,19 +197,69 @@ function RegisterPage() {
               <input
                 id="password"
                 type="password"
-                placeholder="At least 6 characters"
+                placeholder="Create a strong password"
                 value={password}
-                onChange={(event) => setPassword(event.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setPasswordTouched(true);
+                }}
                 required
-                minLength={6}
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purdue-gold focus:outline-none transition-colors"
               />
-              <p className="text-sm text-gray-500 mt-1">
-                Password must be at least 6 characters
-              </p>
+
+              {/* Live checklist — appears as soon as user starts typing */}
+              {passwordTouched && (
+                <ul className="mt-3 space-y-1">
+                  {PASSWORD_RULES.map((rule) => {
+                    const passed = rule.test(password);
+                    return (
+                      <li
+                        key={rule.id}
+                        className={`flex items-center gap-2 text-sm transition-colors ${
+                          passed ? "text-green-600" : "text-gray-400"
+                        }`}
+                      >
+                        {passed ? (
+                          <svg
+                            className="w-4 h-4 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                        ) : (
+                          <svg
+                            className="w-4 h-4 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle cx="12" cy="12" r="9" strokeWidth={2} />
+                          </svg>
+                        )}
+                        {rule.label}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+
+              {/* Static hint shown before user starts typing */}
+              {!passwordTouched && (
+                <p className="text-sm text-gray-500 mt-1">
+                  Must be 8+ characters with uppercase, lowercase, a number,
+                  and a special character.
+                </p>
+              )}
             </div>
 
-            {/* Register Button */}
+            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
@@ -182,7 +269,6 @@ function RegisterPage() {
             </button>
           </form>
 
-          {/* Login Link */}
           <p className="text-center mt-6 text-gray-600">
             Already have an account?{" "}
             <Link
