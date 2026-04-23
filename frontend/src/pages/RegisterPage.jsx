@@ -11,6 +11,7 @@ function RegisterPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -19,7 +20,12 @@ function RegisterPage() {
 
     try {
       await register({ name, email, password });
-      navigate("/dashboard", { replace: true });
+      // Show success state — do NOT navigate yet
+      setSuccess(true);
+      // Redirect to login after 3 seconds
+      setTimeout(() => {
+        navigate("/login", { replace: true });
+      }, 3000);
     } catch (submitError) {
       setError(submitError.message);
     } finally {
@@ -27,11 +33,58 @@ function RegisterPage() {
     }
   };
 
+  // ── Success screen ─────────────────────────────────────────────────────
+  if (success) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <NavHeader backTo="/" />
+        <main className="container mx-auto px-4 py-16 max-w-md">
+          <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+            {/* Green check icon */}
+            <div className="flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mx-auto mb-4">
+              <svg
+                className="w-8 h-8 text-green-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </div>
+
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              Account Created!
+            </h1>
+            <p className="text-gray-600 mb-1">
+              <span className="font-semibold text-gray-800">{email}</span> has
+              been successfully registered.
+            </p>
+            <p className="text-gray-500 text-sm mb-6">
+              Redirecting you to login in a moment...
+            </p>
+
+            <Link
+              to="/login"
+              className="inline-block w-full bg-purdue-gold text-black py-3 rounded-lg font-bold text-lg hover:bg-purdue-gold-dark transition-colors"
+            >
+              Go to Login →
+            </Link>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // ── Registration form ──────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-gray-50">
       <NavHeader backTo="/" />
 
-      {/* Main Content */}
       <main className="container mx-auto px-4 py-16 max-w-md">
         <div className="bg-white rounded-lg shadow-lg p-8">
           <h1 className="text-3xl font-bold text-center mb-8">
@@ -41,7 +94,18 @@ function RegisterPage() {
           {/* Error Message */}
           {error && (
             <div className="bg-red-50 border-2 border-red-200 text-red-800 px-4 py-3 rounded mb-6">
-              {error}
+              {error === "Email already registered"
+                ? `The email address you entered is already in use. Please use a different email or `
+                : error}
+              {error === "Email already registered" && (
+                <Link
+                  to="/login"
+                  className="font-semibold underline hover:text-red-900"
+                >
+                  log in instead
+                </Link>
+              )}
+              {error === "Email already registered" && "."}
             </div>
           )}
 
