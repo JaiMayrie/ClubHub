@@ -4,29 +4,36 @@ import { authAPI } from "../services/api";
 import UserAvatar from "../components/UserAvatar";
 import { useAuth } from "../hooks/useAuth";
 
+// Same password rules as RegisterPage
+const PASSWORD_RULES = [
+  { id: "length",    label: "At least 8 characters",              test: (pw) => pw.length >= 8 },
+  { id: "uppercase", label: "One uppercase letter (A-Z)",          test: (pw) => /[A-Z]/.test(pw) },
+  { id: "lowercase", label: "One lowercase letter (a-z)",          test: (pw) => /[a-z]/.test(pw) },
+  { id: "number",    label: "One number (0-9)",                    test: (pw) => /[0-9]/.test(pw) },
+  { id: "special",   label: "One special character (!@#$%^&*...)", test: (pw) => /[^A-Za-z0-9]/.test(pw) },
+];
+
+function isPasswordValid(pw) {
+  return PASSWORD_RULES.every((rule) => rule.test(pw));
+}
+
 function ProfilePage() {
-  const { updateUser } = useAuth();
+  const { user: authUser, updateUser } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [profileForm, setProfileForm] = useState({
-    name: "",
-    bio: "",
-    major: "",
-    year: "",
-    file: null,
-    preview: null,
-    saving: false,
-    error: "",
-    success: "",
+    name: "", bio: "", major: "", year: "",
+    file: null, preview: null, saving: false, error: "", success: "",
   });
   const [pwForm, setPwForm] = useState({
-    currentPassword: "",
-    newPassword: "",
-    saving: false,
-    error: "",
-    success: "",
+    currentPassword: "", newPassword: "",
+    saving: false, error: "", success: "",
   });
+  const [newPasswordTouched, setNewPasswordTouched] = useState(false);
   const avatarInputRef = useRef(null);
+
+  // True when admin logs in for the first time with temp password
+  const mustChangePassword = authUser?.must_change_password === true;
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -52,11 +59,7 @@ function ProfilePage() {
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    setProfileForm((f) => ({
-      ...f,
-      file,
-      preview: URL.createObjectURL(file),
-    }));
+    setProfileForm((f) => ({ ...f, file, preview: URL.createObjectURL(file) }));
   };
 
   const handleProfileSave = async (e) => {
@@ -68,24 +71,17 @@ function ProfilePage() {
         if (avatarInputRef.current) avatarInputRef.current.value = "";
       }
       const data = await authAPI.updateProfile({
-        name: profileForm.name,
-        bio: profileForm.bio,
-        major: profileForm.major,
-        year: profileForm.year,
+        name: profileForm.name, bio: profileForm.bio,
+        major: profileForm.major, year: profileForm.year,
       });
       setProfile(data.user);
       updateUser(data.user);
       setProfileForm((f) => ({
-        ...f,
-        saving: false,
-        success: "Profile saved!",
-        file: null,
-        preview: null,
+        ...f, saving: false, success: "Profile saved!", file: null, preview: null,
       }));
     } catch (err) {
       setProfileForm((f) => ({
-        ...f,
-        saving: false,
+        ...f, saving: false,
         error: err.response?.data?.error || "Failed to save profile",
       }));
     }
@@ -93,23 +89,31 @@ function ProfilePage() {
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
+    setPwForm((f) => ({ ...f, error: "" }));
+
+    if (!isPasswordValid(pwForm.newPassword)) {
+      setPwForm((f) => ({ ...f, error: "New password does not meet all the requirements listed below." }));
+      setNewPasswordTouched(true);
+      return;
+    }
+
     setPwForm((f) => ({ ...f, saving: true, error: "", success: "" }));
     try {
       await authAPI.changePassword({
         currentPassword: pwForm.currentPassword,
         newPassword: pwForm.newPassword,
       });
+      // Clear the must_change_password flag in auth context so banner disappears
+      updateUser({ must_change_password: false });
       setPwForm({
-        currentPassword: "",
-        newPassword: "",
-        saving: false,
-        error: "",
-        success: "Password changed!",
+        currentPassword: "", newPassword: "",
+        saving: false, error: "",
+        success: "✅ Password changed successfully! You can now use the full dashboard.",
       });
+      setNewPasswordTouched(false);
     } catch (err) {
       setPwForm((f) => ({
-        ...f,
-        saving: false,
+        ...f, saving: false,
         error: err.response?.data?.error || "Failed to change password",
       }));
     }
@@ -127,6 +131,25 @@ function ProfilePage() {
     <div className="min-h-screen bg-gray-50">
       <NavHeader />
       <main className="container mx-auto px-4 py-8 max-w-2xl">
+
+        {/* ── Forced password change banner (admins only, first login) ── */}
+        {mustChangePassword && (
+          <div className="bg-amber-50 border-2 border-amber-400 rounded-xl p-5 mb-6 flex gap-4 items-start">
+            <span className="text-2xl flex-shrink-0">🔐</span>
+            <div>
+              <p className="font-bold text-amber-900 text-lg mb-1">
+                Action required: Change your temporary password
+              </p>
+              <p className="text-amber-800 text-sm leading-relaxed">
+                You are logged in with a temporary password. Please set a new
+                personal password using the form below before doing anything
+                else. Your temporary password is{" "}
+                <strong className="font-mono">ClubHub2026!</strong>
+              </p>
+            </div>
+          </div>
+        )}
+
         <h1 className="text-3xl font-bold mb-8">My Profile</h1>
 
         {/* Profile Info */}
@@ -173,126 +196,114 @@ function ProfilePage() {
           )}
         </div>
 
-        {/* Edit Profile */}
-        <div className="bg-white border-2 border-gray-200 rounded-lg p-6 mb-6">
-          <h2 className="text-xl font-bold mb-4">Edit Profile</h2>
-          {profileForm.error && (
-            <div className="bg-red-50 border-2 border-red-200 text-red-800 px-4 py-3 rounded mb-4">
-              {profileForm.error}
-            </div>
-          )}
-          <form onSubmit={handleProfileSave} className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Profile Photo
-              </label>
-              <div className="flex items-center gap-4">
-                <UserAvatar
-                  name={profileForm.name}
-                  avatarUrl={profileForm.preview || profile?.avatar_url}
-                  size="lg"
-                />
-                <div className="flex-1">
-                  <input
-                    ref={avatarInputRef}
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp,image/gif"
-                    onChange={handleAvatarChange}
-                    className="block w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purdue-gold file:text-black hover:file:bg-purdue-gold-dark file:cursor-pointer"
-                  />
-                  <p className="text-xs text-gray-400 mt-1">
-                    JPEG, PNG, WebP, or GIF · Max 2 MB
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Name
-              </label>
-              <input
-                type="text"
-                required
-                minLength={2}
-                maxLength={100}
-                value={profileForm.name}
-                onChange={(e) =>
-                  setProfileForm((f) => ({ ...f, name: e.target.value }))
-                }
-                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purdue-gold focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Major
-              </label>
-              <input
-                type="text"
-                maxLength={100}
-                placeholder="e.g. Computer Science"
-                value={profileForm.major}
-                onChange={(e) =>
-                  setProfileForm((f) => ({ ...f, major: e.target.value }))
-                }
-                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purdue-gold focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Year
-              </label>
-              <select
-                value={profileForm.year}
-                onChange={(e) =>
-                  setProfileForm((f) => ({ ...f, year: e.target.value }))
-                }
-                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purdue-gold focus:outline-none bg-white"
-              >
-                <option value="">— Select year —</option>
-                <option value="Freshman">Freshman</option>
-                <option value="Sophomore">Sophomore</option>
-                <option value="Junior">Junior</option>
-                <option value="Senior">Senior</option>
-                <option value="Graduate">Graduate</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Bio
-              </label>
-              <textarea
-                maxLength={500}
-                rows={4}
-                placeholder="Tell other members a bit about yourself..."
-                value={profileForm.bio}
-                onChange={(e) =>
-                  setProfileForm((f) => ({ ...f, bio: e.target.value }))
-                }
-                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purdue-gold focus:outline-none resize-none"
-              />
-              <p className="text-xs text-gray-400 text-right mt-1">
-                {profileForm.bio.length}/500
-              </p>
-            </div>
-            {profileForm.success && (
-              <div className="bg-green-50 border-2 border-green-200 text-green-800 px-4 py-3 rounded mb-4">
-                {profileForm.success}
+        {/* Edit Profile — hidden when admin must change password first */}
+        {!mustChangePassword && (
+          <div className="bg-white border-2 border-gray-200 rounded-lg p-6 mb-6">
+            <h2 className="text-xl font-bold mb-4">Edit Profile</h2>
+            {profileForm.error && (
+              <div className="bg-red-50 border-2 border-red-200 text-red-800 px-4 py-3 rounded mb-4">
+                {profileForm.error}
               </div>
             )}
-            <button
-              type="submit"
-              disabled={profileForm.saving}
-              className="bg-purdue-gold text-black px-6 py-2 rounded-lg font-bold hover:bg-purdue-gold-dark disabled:opacity-50 transition-colors"
-            >
-              {profileForm.saving ? "Saving..." : "Save Profile"}
-            </button>
-          </form>
-        </div>
+            <form onSubmit={handleProfileSave} className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Profile Photo
+                </label>
+                <div className="flex items-center gap-4">
+                  <UserAvatar
+                    name={profileForm.name}
+                    avatarUrl={profileForm.preview || profile?.avatar_url}
+                    size="lg"
+                  />
+                  <div className="flex-1">
+                    <input
+                      ref={avatarInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      onChange={handleAvatarChange}
+                      className="block w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purdue-gold file:text-black hover:file:bg-purdue-gold-dark file:cursor-pointer"
+                    />
+                    <p className="text-xs text-gray-400 mt-1">
+                      JPEG, PNG, WebP, or GIF · Max 2 MB
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Name</label>
+                <input
+                  type="text" required minLength={2} maxLength={100}
+                  value={profileForm.name}
+                  onChange={(e) => setProfileForm((f) => ({ ...f, name: e.target.value }))}
+                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purdue-gold focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Major</label>
+                <input
+                  type="text" maxLength={100} placeholder="e.g. Computer Science"
+                  value={profileForm.major}
+                  onChange={(e) => setProfileForm((f) => ({ ...f, major: e.target.value }))}
+                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purdue-gold focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Year</label>
+                <select
+                  value={profileForm.year}
+                  onChange={(e) => setProfileForm((f) => ({ ...f, year: e.target.value }))}
+                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purdue-gold focus:outline-none bg-white"
+                >
+                  <option value="">— Select year —</option>
+                  <option value="Freshman">Freshman</option>
+                  <option value="Sophomore">Sophomore</option>
+                  <option value="Junior">Junior</option>
+                  <option value="Senior">Senior</option>
+                  <option value="Graduate">Graduate</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Bio</label>
+                <textarea
+                  maxLength={500} rows={4}
+                  placeholder="Tell other members a bit about yourself..."
+                  value={profileForm.bio}
+                  onChange={(e) => setProfileForm((f) => ({ ...f, bio: e.target.value }))}
+                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-purdue-gold focus:outline-none resize-none"
+                />
+                <p className="text-xs text-gray-400 text-right mt-1">
+                  {profileForm.bio.length}/500
+                </p>
+              </div>
+              {profileForm.success && (
+                <div className="bg-green-50 border-2 border-green-200 text-green-800 px-4 py-3 rounded">
+                  {profileForm.success}
+                </div>
+              )}
+              <button
+                type="submit" disabled={profileForm.saving}
+                className="bg-purdue-gold text-black px-6 py-2 rounded-lg font-bold hover:bg-purdue-gold-dark disabled:opacity-50 transition-colors"
+              >
+                {profileForm.saving ? "Saving..." : "Save Profile"}
+              </button>
+            </form>
+          </div>
+        )}
 
-        {/* Change Password */}
-        <div className="bg-white border-2 border-gray-200 rounded-lg p-6">
-          <h2 className="text-xl font-bold mb-4">Change Password</h2>
+        {/* Change Password — highlighted when forced */}
+        <div className={`bg-white border-2 rounded-lg p-6 ${mustChangePassword ? "border-amber-400" : "border-gray-200"}`}>
+          <h2 className="text-xl font-bold mb-1">
+            {mustChangePassword ? "🔐 Set Your New Password" : "Change Password"}
+          </h2>
+          {mustChangePassword && (
+            <p className="text-sm text-amber-700 mb-4">
+              Enter your temporary password <strong className="font-mono">ClubHub2026!</strong> in the
+              current password field, then choose your new password.
+            </p>
+          )}
+
           {pwForm.success && (
             <div className="bg-green-50 border-2 border-green-200 text-green-800 px-4 py-3 rounded mb-4">
               {pwForm.success}
@@ -303,18 +314,16 @@ function ProfilePage() {
               {pwForm.error}
             </div>
           )}
+
           <form onSubmit={handlePasswordChange} className="space-y-4">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Current Password
+                {mustChangePassword ? "Temporary Password" : "Current Password"}
               </label>
               <input
-                type="password"
-                required
+                type="password" required
                 value={pwForm.currentPassword}
-                onChange={(e) =>
-                  setPwForm((f) => ({ ...f, currentPassword: e.target.value }))
-                }
+                onChange={(e) => setPwForm((f) => ({ ...f, currentPassword: e.target.value }))}
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purdue-gold focus:outline-none"
               />
             </div>
@@ -323,25 +332,62 @@ function ProfilePage() {
                 New Password
               </label>
               <input
-                type="password"
-                required
-                minLength={6}
+                type="password" required
                 value={pwForm.newPassword}
-                onChange={(e) =>
-                  setPwForm((f) => ({ ...f, newPassword: e.target.value }))
-                }
+                onChange={(e) => {
+                  setPwForm((f) => ({ ...f, newPassword: e.target.value }));
+                  setNewPasswordTouched(true);
+                }}
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purdue-gold focus:outline-none"
               />
-              <p className="text-sm text-gray-500 mt-1">
-                At least 6 characters
-              </p>
+
+              {/* Live password checklist */}
+              {newPasswordTouched && (
+                <ul className="mt-3 space-y-1">
+                  {PASSWORD_RULES.map((rule) => {
+                    const passed = rule.test(pwForm.newPassword);
+                    return (
+                      <li
+                        key={rule.id}
+                        className={`flex items-center gap-2 text-sm transition-colors ${
+                          passed ? "text-green-600" : "text-gray-400"
+                        }`}
+                      >
+                        {passed ? (
+                          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="9" strokeWidth={2} />
+                          </svg>
+                        )}
+                        {rule.label}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+              {!newPasswordTouched && (
+                <p className="text-sm text-gray-500 mt-1">
+                  Must be 8+ characters with uppercase, lowercase, a number, and a special character.
+                </p>
+              )}
             </div>
+
             <button
-              type="submit"
-              disabled={pwForm.saving}
-              className="w-full bg-purdue-gold text-black py-3 rounded-lg font-bold hover:bg-purdue-gold-dark disabled:opacity-50 transition-colors"
+              type="submit" disabled={pwForm.saving}
+              className={`w-full py-3 rounded-lg font-bold transition-colors disabled:opacity-50 ${
+                mustChangePassword
+                  ? "bg-amber-400 text-black hover:bg-amber-500"
+                  : "bg-purdue-gold text-black hover:bg-purdue-gold-dark"
+              }`}
             >
-              {pwForm.saving ? "Changing..." : "Change Password"}
+              {pwForm.saving
+                ? "Changing..."
+                : mustChangePassword
+                ? "Set New Password"
+                : "Change Password"}
             </button>
           </form>
         </div>
