@@ -119,7 +119,7 @@ exports.login = async (req, res) => {
     const normalizedEmail = email.trim().toLowerCase();
 
     const result = await db.query(
-      "SELECT id, name, email, password_hash, role FROM users WHERE email = $1",
+      "SELECT id, name, email, password_hash, role, must_change_password FROM users WHERE email = $1",
       [normalizedEmail],
     );
 
@@ -145,6 +145,7 @@ exports.login = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        must_change_password: user.must_change_password,
       },
     });
   } catch (error) {
@@ -157,7 +158,7 @@ exports.login = async (req, res) => {
 exports.getMe = async (req, res) => {
   try {
     const result = await db.query(
-      "SELECT id, name, email, role, avatar_url FROM users WHERE id = $1",
+      "SELECT id, name, email, role, avatar_url, must_change_password FROM users WHERE id = $1",
       [req.userId],
     );
 
@@ -385,6 +386,10 @@ exports.changePassword = async (req, res) => {
       req.userId,
     ]);
 
+    await db.query(
+      "UPDATE users SET must_change_password = FALSE WHERE id = $1",
+      [req.userId]
+    );
     return res.json({ message: "Password changed successfully" });
   } catch (error) {
     console.error("Change password error:", error);

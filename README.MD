@@ -272,3 +272,19 @@ curl "http://localhost:5000/api/clubs?category=Sports&search=basketball"
 - `POST /api/join-requests` - Submit a join request
 - `GET /api/join-requests/my-requests` - Get current user's requests
 - `PATCH /api/join-requests/:id` - Approve or reject a request (admin only)
+
+#### Important Local Setup Summary
+
+For the website to work properly on a new local machine, always run:
+
+cd backend
+npm install
+node src/database/seeds/seed.js
+node src/database/seeds/seed-admins.js
+npm run dev
+
+and separately:
+
+cd frontend
+npm install
+npm run dev

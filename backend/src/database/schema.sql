@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS memberships;
 DROP TABLE IF EXISTS events;
 DROP TABLE IF EXISTS clubs;
 DROP TABLE IF EXISTS users;
+
 -- ============================================
 -- USERS TABLE
 -- ============================================
@@ -21,6 +22,7 @@ CREATE TABLE users (
   major VARCHAR(100) DEFAULT '',
   year VARCHAR(20) DEFAULT '' CHECK (year IN ('', 'Freshman', 'Sophomore', 'Junior', 'Senior', 'Graduate', 'Other')),
   avatar_url VARCHAR(500) DEFAULT '',
+  must_change_password BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
