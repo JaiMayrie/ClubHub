@@ -50,6 +50,15 @@ function NavHeader({ backTo, backLabel = "← Back to Home" }) {
               >
                 Clubs
               </Link>
+
+              {/* ✅ EVENTS LINK (DESKTOP) */}
+              <Link
+                to="/events"
+                className="text-white hover:text-purdue-gold transition-colors font-medium"
+              >
+                Events
+              </Link>
+
               {user ? (
                 <>
                   <Link
@@ -101,6 +110,16 @@ function NavHeader({ backTo, backLabel = "← Back to Home" }) {
           >
             Clubs
           </Link>
+
+          {/* ✅ EVENTS LINK (MOBILE) */}
+          <Link
+            to="/events"
+            className="text-white hover:text-purdue-gold font-medium"
+            onClick={() => setMenuOpen(false)}
+          >
+            Events
+          </Link>
+
           {user ? (
             <>
               <Link

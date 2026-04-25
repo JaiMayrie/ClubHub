@@ -12,6 +12,7 @@ import ClubMembersPage from "./pages/ClubMembersPage";
 import ProfilePage from "./pages/ProfilePage";
 import PublicProfilePage from "./pages/PublicProfilePage";
 import NotFoundPage from "./pages/NotFoundPage";
+import EventsPage from "./pages/EventsPage";
 
 function App() {
   return (
@@ -19,8 +20,9 @@ function App() {
       {/* Public Routes */}
       <Route path="/" element={<HomePage />} />
       <Route path="/clubs" element={<BrowseClubsPage />} />
+      <Route path="/events" element={<EventsPage />} />
 
-      {/* Auth Routes (redirect to dashboard if already logged in) */}
+      {/* Auth Routes */}
       <Route
         element={<ProtectedRoute requireAuth={false} redirectTo="/dashboard" />}
       >

@@ -2,36 +2,27 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import NavHeader from "../components/NavHeader";
-import { clubsAPI } from "../services/api";
-
-const sampleEvents = [
-  {
-    id: 1,
-    title: "Spring Club Fair",
-    date: "2026-04-20",
-    location: "Walb Union",
-    image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80"
-  },
-    { 
-      id: 2,
-      title: "Coding Night",
-      date: "2026-05-10",
-      location: "Computer Science Building",
-      image: "https://images.unsplash.com/photo-1555066931-4365d14b8c16?auto=format&fit=crop&w=800&q=80"
-    }
-  ];
+import { clubsAPI, eventsAPI } from "../services/api";
 
 function HomePage() {
   const { user } = useAuth();
   const [featuredClubs, setFeaturedClubs] = useState([]);
+  const [featuredEvents, setFeaturedEvents] = useState([]);
 
   useEffect(() => {
     clubsAPI
       .getAll()
       .then((data) => {
-        setFeaturedClubs(data.clubs.slice(0, 2));
+        setFeaturedClubs((data.clubs || []).slice(0, 2));
       })
       .catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    eventsAPI
+      .getRecent()
+      .then((data) => setFeaturedEvents(data.events || []))
+      .catch((error) => console.error("Error fetching featured events:", error));
   }, []);
 
   return (
@@ -119,6 +110,56 @@ function HomePage() {
               View all clubs →
             </Link>
           </div>
+        </section>
+
+        {/* Featured Events Section */}
+        <section className="mt-16">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="text-3xl font-bold">Featured Events</h2>
+              <p className="text-gray-600">See what’s happening around campus.</p>
+            </div>
+
+            <Link
+              to="/events"
+              className="text-purdue-gold font-semibold hover:underline"
+            >
+              View all events
+            </Link>
+          </div>
+
+          {featuredEvents.length === 0 ? (
+            <p className="text-gray-600">No featured events yet.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {featuredEvents.slice(0, 3).map((event) => (
+                <article
+                  key={event.id}
+                  className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6"
+                >
+                  <p className="text-sm font-semibold text-purdue-gold mb-2">
+                    {event.club_name || "Club Event"}
+                  </p>
+
+                  <h3 className="text-xl font-bold mb-2">{event.name}</h3>
+
+                  <p className="text-gray-700 mb-4 line-clamp-3">
+                    {event.description}
+                  </p>
+
+                  <p className="text-sm text-gray-600">
+                    {new Date(event.event_date).toLocaleDateString()}
+                  </p>
+
+                  {event.location && (
+                    <p className="text-sm text-gray-600 mt-1">
+                      {event.location}
+                    </p>
+                  )}
+                </article>
+              ))}
+            </div>
+          )}
         </section>
       </main>
 

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import NavHeader from "../components/NavHeader";
-import { clubsAPI, membershipsAPI, joinRequestsAPI } from "../services/api";
+import { clubsAPI, membershipsAPI, joinRequestsAPI, eventsAPI  } from "../services/api";
 import AIRecommendations from "../components/AIRecommendations";
 
 function DashboardPage() {
@@ -78,6 +78,7 @@ function DashboardPage() {
                 + Create New Club
               </Link>
             </div>
+            <AdminEventsTab clubs={myClubs} />
 
             <section>
               <div className="bg-white border-2 border-gray-200 rounded-lg p-6">
@@ -305,6 +306,115 @@ function AdminClubCard({ club }) {
         </div>
       </div>
     </div>
+  );
+}
+function AdminEventsTab({ clubs }) {
+  const [formData, setFormData] = useState({
+    club_id: "",
+    title: "",
+    description: "",
+    location: "",
+    event_date: "",
+  });
+
+  const [message, setMessage] = useState("");
+
+  const handleChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      await eventsAPI.create(formData);
+      setMessage("Event created successfully!");
+
+      setFormData({
+        club_id: "",
+        title: "",
+        description: "",
+        location: "",
+        event_date: "",
+      });
+    } catch (error) {
+      console.error("Error creating event:", error);
+      setMessage("Failed to create event.");
+    }
+  };
+
+  return (
+    <section className="bg-white border-2 border-gray-200 rounded-lg p-6 mb-8">
+      <h2 className="text-xl font-bold mb-4">Create Event</h2>
+
+      {message && <p className="mb-4 text-gray-700">{message}</p>}
+
+      <form onSubmit={handleSubmit} className="grid gap-3">
+        <select
+          id="club_id"
+          name="club_id"
+          value={formData.club_id}
+          onChange={handleChange}
+          required
+          className="border px-3 py-2 rounded"
+        >
+          <option value="">Select Club</option>
+          {clubs.map((club) => (
+            <option key={club.id} value={club.id}>
+              {club.name}
+            </option>
+          ))}
+        </select>
+
+        <input
+          id="title"
+          name="title"
+          placeholder="Event name"
+          value={formData.title}
+          onChange={handleChange}
+          required
+          className="border px-3 py-2 rounded"
+        />
+
+        <input
+          id="location"
+          name="location"
+          placeholder="Location"
+          value={formData.location}
+          onChange={handleChange}
+          className="border px-3 py-2 rounded"
+        />
+
+        <input
+          id="event_date"
+          type="datetime-local"
+          name="event_date"
+          value={formData.event_date}
+          onChange={handleChange}
+          required
+          className="border px-3 py-2 rounded"
+        />
+
+        <textarea
+          id="description"
+          name="description"
+          placeholder="Description"
+          value={formData.description}
+          onChange={handleChange}
+          className="border px-3 py-2 rounded"
+        />
+
+        <button
+          type="submit"
+          className="bg-purdue-gold text-black py-2 rounded font-semibold hover:bg-purdue-gold-dark transition-colors"
+        >
+          Create Event
+        </button>
+      </form>
+    </section>
   );
 }
 

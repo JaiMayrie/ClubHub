@@ -12,7 +12,9 @@
 // Override by passing DB_HOST in your shell: DB_HOST=myserver npm run db:seed
 if (!process.env.DB_HOST) {
   process.env.DB_HOST = "localhost";
-  process.env.DB_PORT = "5433";
+}
+if (!process.env.DB_PORT) {
+  process.env.DB_PORT = "5432";
 }
 require("dotenv").config();
 const fs = require("fs");
@@ -1613,8 +1615,11 @@ async function seed() {
 }
 
 seed()
-  .catch((err) => {
-    console.error("Seed failed:", err);
-    process.exit(1);
+  .then(() => {
+    console.log("Database seeded successfully.");
+    process.exit(0);
   })
-  .finally(() => db.pool.end());
+  .catch((error) => {
+    console.error("Seed failed:", error);
+    process.exit(1);
+  });
