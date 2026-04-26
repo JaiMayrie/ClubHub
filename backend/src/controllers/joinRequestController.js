@@ -1,4 +1,5 @@
 const db = require("../db");
+const { sendJoinRequestEmail } = require("../services/emailService");
 
 /**
  * Submit a join request to a club
@@ -18,9 +19,14 @@ exports.submitJoinRequest = async (req, res) => {
       return res.status(400).json({ error: "Club ID is required" });
     }
 
-    // Check if club exists
+    // Check if club exists — also fetch admin info needed for email
     const clubCheck = await db.query(
-      "SELECT id, name, admin_id FROM clubs WHERE id = $1",
+      `SELECT clubs.id, clubs.name, clubs.admin_id,
+              users.name  AS admin_name,
+              users.email AS admin_email
+       FROM clubs
+       JOIN users ON clubs.admin_id = users.id
+       WHERE clubs.id = $1`,
       [club_id],
     );
 
@@ -28,8 +34,10 @@ exports.submitJoinRequest = async (req, res) => {
       return res.status(404).json({ error: "Club not found" });
     }
 
+    const club = clubCheck.rows[0];
+
     // Check if user owns the club
-    if (clubCheck.rows[0].admin_id === userId) {
+    if (club.admin_id === userId) {
       return res.status(400).json({ error: "You are the admin of this club" });
     }
 
@@ -57,6 +65,13 @@ exports.submitJoinRequest = async (req, res) => {
         .json({ error: "You already have a pending request for this club" });
     }
 
+    // Fetch student details for the email notification
+    const studentResult = await db.query(
+      "SELECT name, email FROM users WHERE id = $1",
+      [userId],
+    );
+    const student = studentResult.rows[0];
+
     // Create join request
     const result = await db.query(
       `INSERT INTO join_requests (user_id, club_id, message, status)
@@ -64,6 +79,18 @@ exports.submitJoinRequest = async (req, res) => {
        RETURNING *`,
       [userId, club_id, message || null, "pending"],
     );
+
+    // Send email notification to admin — fire and forget (never blocks the response)
+    sendJoinRequestEmail({
+      adminEmail:   club.admin_email,
+      adminName:    club.admin_name,
+      clubName:     club.name,
+      studentName:  student.name,
+      studentEmail: student.email,
+      message:      message || "",
+    }).catch((err) => {
+      console.error("⚠️  Join request email failed (non-blocking):", err.message);
+    });
 
     res.status(201).json({
       message: "Join request submitted successfully",
