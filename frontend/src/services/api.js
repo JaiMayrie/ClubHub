@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001/api";
 
 export const getAvatarUrl = (avatarUrl) => {
   if (!avatarUrl) return null;
@@ -11,7 +11,7 @@ const api = axios.create({
   baseURL: API_URL,
 });
 
-// Request interceptor — attach token
+// Attach token to every request
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("clubhub_token");
@@ -20,12 +20,10 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  },
+  (error) => Promise.reject(error)
 );
 
-// Response interceptor — auto-logout on 401
+// Auto logout on 401
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -37,12 +35,12 @@ api.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  },
+  }
 );
 
-// ============================================
+// ==========================
 // AUTH API
-// ============================================
+// ==========================
 export const authAPI = {
   register: async (userData) => {
     const response = await api.post("/auth/register", userData);
@@ -89,9 +87,9 @@ export const authAPI = {
   },
 };
 
-// ============================================
+// ==========================
 // CLUBS API
-// ============================================
+// ==========================
 export const clubsAPI = {
   getAll: async (params = {}) => {
     const response = await api.get("/clubs", { params });
@@ -119,9 +117,9 @@ export const clubsAPI = {
   },
 };
 
-// ============================================
+// ==========================
 // JOIN REQUESTS API
-// ============================================
+// ==========================
 export const joinRequestsAPI = {
   submit: async (clubId, message = "") => {
     const response = await api.post("/join-requests", {
@@ -149,9 +147,9 @@ export const joinRequestsAPI = {
   },
 };
 
-// ============================================
+// ==========================
 // MEMBERSHIPS API
-// ============================================
+// ==========================
 export const membershipsAPI = {
   getMy: async () => {
     const response = await api.get("/memberships/my-memberships");
@@ -164,9 +162,9 @@ export const membershipsAPI = {
   },
 };
 
-// ============================================
+// ==========================
 // MEMBERS API
-// ============================================
+// ==========================
 export const membersAPI = {
   getClubMembers: async (clubId) => {
     const response = await api.get(`/clubs/${clubId}/members`);
@@ -174,12 +172,22 @@ export const membersAPI = {
   },
 
   removeMember: async (clubId, userId) => {
-    const response = await api.delete(`/clubs/${clubId}/members/${userId}`);
+    const response = await api.delete(
+      `/clubs/${clubId}/members/${userId}`
+    );
+    return response.data;
+  },
+};
+
+// ==========================
+// EVENTS API (FIXED)
+// ==========================
+export const eventsAPI = {
+  getAll: async () => {
+    const response = await api.get("/events/recent"); // ✅ FIXED HERE
     return response.data;
   },
 
-};
-export const eventsAPI = {
   getRecent: async () => {
     const response = await api.get("/events/recent");
     return response.data;
@@ -196,9 +204,9 @@ export const eventsAPI = {
   },
 };
 
-// ============================================
+// ==========================
 // RECOMMENDATIONS API
-// ============================================
+// ==========================
 export const recommendationsAPI = {
   getSuggestions: async () => {
     const response = await api.get("/recommendations");

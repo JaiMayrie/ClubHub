@@ -1,5 +1,28 @@
 const db = require("../db");
 
+exports.getAllEvents = async (req, res) => {
+  try {
+    const result = await db.query(
+      `
+      SELECT
+        events.*,
+        clubs.name AS club_name,
+        clubs.category AS club_category
+      FROM events
+      JOIN clubs ON events.club_id = clubs.id
+      ORDER BY events.event_date ASC
+      `
+    );
+
+    res.json({
+      events: result.rows,
+      count: result.rows.length,
+    });
+  } catch (error) {
+    console.error("Error fetching all events:", error);
+    res.status(500).json({ error: "Failed to fetch events" });
+  }
+};
 exports.getRecentEvents = async (req, res) => {
   try {
     const result = await db.query(

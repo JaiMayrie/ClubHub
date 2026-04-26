@@ -29,7 +29,9 @@ function BrowseClubsPage() {
     try {
       const params = {};
       if (search) params.search = search;
-      if (category && category !== "All Categories") params.category = category;
+      if (category && category !== "All Categories") {
+        params.category = category;
+      }
 
       const data = await clubsAPI.getAll(params);
       setClubs(data.clubs || []);
@@ -58,8 +60,14 @@ function BrowseClubsPage() {
             Search & Filter
           </h3>
 
+          {/* ✅ FIXED INPUT */}
+          <label htmlFor="search" className="sr-only">
+            Search clubs
+          </label>
           <input
             type="text"
+            id="search"
+            name="search"
             placeholder="Search clubs..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -71,7 +79,7 @@ function BrowseClubsPage() {
             value={category || "All Categories"}
             onChange={(e) =>
               setCategory(
-                e.target.value === "All Categories" ? "" : e.target.value,
+                e.target.value === "All Categories" ? "" : e.target.value
               )
             }
             aria-label="Filter by category"
@@ -85,10 +93,10 @@ function BrowseClubsPage() {
           </select>
         </div>
 
-        {/* Two-column layout: club grid + AI sidebar */}
+        {/* Layout */}
         <div className="flex flex-col lg:flex-row gap-8 items-start">
 
-          {/* Left: club grid */}
+          {/* Clubs */}
           <div className="flex-1 min-w-0">
             <div className="mb-4">
               <h2 className="text-sm font-semibold text-gray-600 uppercase">
@@ -127,7 +135,6 @@ function BrowseClubsPage() {
                         />
                         <div
                           className={`absolute inset-0 bg-gradient-to-t ${visual.accent} opacity-70`}
-                          aria-hidden="true"
                         />
                         <div className="absolute bottom-4 left-4 right-4 text-white">
                           <span className="inline-block bg-white/20 backdrop-blur px-3 py-1 rounded-full text-xs font-semibold mb-2">
@@ -165,7 +172,7 @@ function BrowseClubsPage() {
             )}
           </div>
 
-          {/* Right: AI sidebar — only for logged-in users */}
+          {/* AI Sidebar */}
           {user && (
             <aside className="w-full lg:w-72 flex-shrink-0">
               <div className="sticky top-4 bg-white border-2 border-gray-200 rounded-lg p-5">

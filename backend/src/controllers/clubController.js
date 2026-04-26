@@ -1,131 +1,56 @@
 const db = require("../db");
 
 /**
- * Get all clubs with optional filtering
- *
- * @route   GET /api/clubs
- * @access  Public
- * @query   {string} category - Optional: Filter clubs by category
- * @query   {string} search - Optional: Search clubs by name or description
- * @returns {Object} Response object containing clubs array
- * @returns {Array} clubs - Array of club objects
- * @returns {number} clubs[].id - Club ID
- * @returns {string} clubs[].name - Club name
- * @returns {string} clubs[].category - Club category
- * @returns {string} clubs[].description - Club description
- * @returns {number} clubs[].member_count - Number of members
- * @returns {string} clubs[].admin_name - Name of club administrator
- *
- * @example
- * // Get all clubs
- * GET /api/clubs
- *
- * @example
- * // Filter by category
- * GET /api/clubs?category=Academic
- *
- * @example
- * // Search clubs
- * GET /api/clubs?search=chess
+ * Get All Clubs
  */
-
 exports.getAllClubs = async (req, res) => {
   try {
-    // Extract and sanitize query parameters
-    const { category, search } = req.query;
-    const sanitizedCategory = category?.trim();
-    const sanitizedSearch = search?.trim();
-
-    // Build dynamic SQL query
-    let query = `
+    const result = await db.query(`
       SELECT 
-        clubs.id, 
-        clubs.name, 
-        clubs.category, 
-        clubs.description, 
-        (SELECT COUNT(*) FROM memberships WHERE memberships.club_id = clubs.id) AS member_count,
+        clubs.id,
+        clubs.name,
+        clubs.category,
+        clubs.description,
+        clubs.meeting_info,
+        clubs.contact_email,
+        clubs.admin_id,
         clubs.created_at,
-        users.name as admin_name
+        clubs.updated_at,
+        COUNT(memberships.id) AS member_count,
+        users.name AS admin_name
       FROM clubs
       LEFT JOIN users ON clubs.admin_id = users.id
-    `;
+      LEFT JOIN memberships ON memberships.club_id = clubs.id
+      GROUP BY clubs.id, users.name
+      ORDER BY clubs.name ASC
+    `);
 
-    const values = [];
-    const conditions = [];
-    let paramCount = 1;
-
-    // Add category filter if provided
-    if (sanitizedCategory) {
-      conditions.push(`clubs.category = $${paramCount}`);
-      values.push(sanitizedCategory);
-      paramCount++;
-    }
-
-    // Add search filter if provided (searches both name and description)
-    if (sanitizedSearch) {
-      conditions.push(
-        `(clubs.name ILIKE $${paramCount} OR clubs.description ILIKE $${paramCount})`,
-      );
-      values.push(`%${sanitizedSearch}%`);
-      paramCount++;
-    }
-
-    // Apply WHERE clause if any conditions exist
-    if (conditions.length > 0) {
-      query += " WHERE " + conditions.join(" AND ");
-    }
-
-    // Always order by name
-    query += " ORDER BY clubs.name ASC";
-
-    // Execute query
-    const result = await db.query(query, values);
-
-    // Handle empty results
-    if (result.rows.length === 0) {
-      return res.json({
-        clubs: [],
-        count: 0,
-        message: "No clubs found matching your criteria",
-      });
-    }
-
-    // Return clubs data
-    res.json({
+    return res.json({
       clubs: result.rows,
       count: result.rows.length,
     });
+
   } catch (error) {
-    console.error("Error fetching clubs:", error);
-    res.status(500).json({
+    console.error("❌ Error fetching clubs:", error);
+
+    return res.status(500).json({
       error: "Failed to fetch clubs",
-      message: "An error occurred while retrieving clubs from the database",
+      message: error.message,
     });
   }
 };
 
 /**
- * Get club by ID with detailed information
- *
- * @route   GET /api/clubs/:id
- * @access  Public
- * @param   {number} id - Club ID from URL parameter
- * @returns {Object} club - Detailed club information including admin details
- *
- * @example
- * GET /api/clubs/1
+ * Get Club By ID
  */
 exports.getClubById = async (req, res) => {
   try {
-    // Extract club ID from URL parameters
     const { id } = req.params;
 
-    // Validate ID is a number
     if (isNaN(id)) {
       return res.status(400).json({ error: "Invalid club ID" });
     }
 
-    // Query club with admin information
     const result = await db.query(
       `
       SELECT 
@@ -145,267 +70,21 @@ exports.getClubById = async (req, res) => {
       LEFT JOIN users ON clubs.admin_id = users.id
       WHERE clubs.id = $1
     `,
-      [id],
+      [id]
     );
 
-    // Handle club not found
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Club not found" });
     }
 
-    // Return club details
-    res.json({ club: result.rows[0] });
+    return res.json({ club: result.rows[0] });
+
   } catch (error) {
-    console.error("Error fetching club:", error);
-    res.status(500).json({ error: "Failed to fetch club" });
-  }
-};
+    console.error("❌ Error fetching club:", error);
 
-/**
- * Create a new club (admin only)
- *
- * @route   POST /api/clubs
- * @access  Private (Admin only)
- * @body    {string} name - Club name (required)
- * @body    {string} category - Club category (required)
- * @body    {string} description - Club description (required)
- * @body    {string} meeting_info - Meeting information (optional)
- * @body    {string} contact_email - Contact email (optional)
- * @returns {Object} club - Created club object
- *
- * @example
- * POST /api/clubs
- * Headers: { Authorization: "Bearer <token>" }
- * Body: {
- *   "name": "Robotics Club",
- *   "category": "Academic",
- *   "description": "Build and program robots",
- *   "meeting_info": "Fridays 5PM",
- *   "contact_email": "robotics@purdue.edu"
- * }
- */
-exports.createClub = async (req, res) => {
-  try {
-    const { name, category, description, meeting_info, contact_email } =
-      req.body;
-
-    // ========== VALIDATION 1: Required Fields ==========
-    if (!name || !category || !description) {
-      return res.status(400).json({
-        error: "Name, category, and description are required",
-      });
-    }
-
-    // ========== VALIDATION 2: Name Length ==========
-    if (name.length < 3 || name.length > 150) {
-      return res.status(400).json({
-        error: `Club name must be between 3 and 150 characters (got ${name.length})`,
-      });
-    }
-
-    // ========== VALIDATION 3: Valid Category ==========
-    const validCategories = [
-      "Academic",
-      "Sports",
-      "Arts",
-      "Service",
-      "Professional",
-      "Special Interest",
-    ];
-
-    if (!validCategories.includes(category)) {
-      return res.status(400).json({
-        error: `Invalid category. Must be one of: ${validCategories.join(", ")}`,
-      });
-    }
-
-    // ========== VALIDATION 4: Contact Email Format ==========
-    if (contact_email) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(contact_email)) {
-        return res.status(400).json({
-          error: "Invalid contact email format",
-        });
-      }
-    }
-
-    // ========== AUTHORIZATION: Check Admin Role ==========
-    if (req.userRole !== "admin") {
-      return res.status(403).json({
-        error: "Only administrators can create clubs",
-      });
-    }
-
-    // ========== DATABASE: Insert New Club ==========
-    const result = await db.query(
-      `INSERT INTO clubs (name, category, description, meeting_info, contact_email, admin_id)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING *`,
-      [name, category, description, meeting_info, contact_email, req.userId],
-    );
-
-    const club = result.rows[0];
-
-    // Add the admin as a member of their own club
-    await db.query(
-      "INSERT INTO memberships (user_id, club_id) VALUES ($1, $2)",
-      [req.userId, club.id],
-    );
-
-    // ========== SUCCESS RESPONSE ==========
-    res.status(201).json({
-      message: "Club created successfully",
-      club,
+    return res.status(500).json({
+      error: "Failed to fetch club",
+      message: error.message,
     });
-  } catch (error) {
-    console.error("Error creating club:", error);
-    res.status(500).json({
-      error: "Failed to create club",
-      message: "An error occurred while creating the club",
-    });
-  }
-};
-
-/**
- * Get clubs managed by current user
- *
- * @route   GET /api/clubs/my-clubs
- * @access  Private (requires authentication)
- * @returns {Array} clubs - List of clubs where user is admin
- *
- * @example
- * GET /api/clubs/my-clubs
- * Headers: { Authorization: "Bearer <token>" }
- */
-exports.getMyClubs = async (req, res) => {
-  try {
-    const result = await db.query(
-      `SELECT 
-        id, name, category, description, created_at, updated_at,
-        (SELECT COUNT(*) FROM memberships WHERE memberships.club_id = clubs.id) AS member_count
-       FROM clubs
-       WHERE admin_id = $1
-       ORDER BY created_at DESC`,
-      [req.userId], // req.userId comes from authenticate middleware
-    );
-
-    res.json({
-      clubs: result.rows,
-      count: result.rows.length,
-    });
-  } catch (error) {
-    console.error("Error fetching user clubs:", error);
-    res.status(500).json({ error: "Failed to fetch clubs" });
-  }
-};
-
-/**
- * Get join requests for a specific club (admin only)
- *
- * @route   GET /api/clubs/:id/join-requests
- * @access  Private (club admin only)
- */
-exports.getClubJoinRequests = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const userId = req.userId;
-
-    // Check if user is admin of this club
-    const clubCheck = await db.query(
-      "SELECT admin_id FROM clubs WHERE id = $1",
-      [id],
-    );
-
-    if (clubCheck.rows.length === 0) {
-      return res.status(404).json({ error: "Club not found" });
-    }
-
-    if (clubCheck.rows[0].admin_id !== userId) {
-      return res.status(403).json({
-        error: "You are not authorized to view requests for this club",
-      });
-    }
-
-    // Get pending join requests with user information
-    const result = await db.query(
-      `SELECT 
-        join_requests.*,
-        users.name as user_name,
-        users.email as user_email
-       FROM join_requests
-       JOIN users ON join_requests.user_id = users.id
-       WHERE join_requests.club_id = $1 AND join_requests.status = $2
-       ORDER BY join_requests.created_at DESC`,
-      [id, "pending"],
-    );
-
-    res.json({
-      requests: result.rows,
-      count: result.rows.length,
-    });
-  } catch (error) {
-    console.error("Error fetching join requests:", error);
-    res.status(500).json({ error: "Failed to fetch join requests" });
-  }
-};
-
-exports.updateClub = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { name, category, description, meeting_info, contact_email } =
-      req.body;
-    const userId = req.userId;
-
-    // Check club exists and user is the admin
-    const clubCheck = await db.query(
-      "SELECT admin_id FROM clubs WHERE id = $1",
-      [id],
-    );
-    if (clubCheck.rows.length === 0) {
-      return res.status(404).json({ error: "Club not found" });
-    }
-    if (clubCheck.rows[0].admin_id !== userId) {
-      return res
-        .status(403)
-        .json({ error: "Only the club admin can edit this club" });
-    }
-
-    const validCategories = [
-      "Academic",
-      "Sports",
-      "Arts",
-      "Service",
-      "Professional",
-      "Special Interest",
-    ];
-    if (category && !validCategories.includes(category)) {
-      return res.status(400).json({
-        error: `Invalid category. Must be one of: ${validCategories.join(", ")}`,
-      });
-    }
-    if (contact_email) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(contact_email)) {
-        return res.status(400).json({ error: "Invalid contact email format" });
-      }
-    }
-
-    const result = await db.query(
-      `UPDATE clubs
-       SET name = COALESCE($1, name),
-           category = COALESCE($2, category),
-           description = COALESCE($3, description),
-           meeting_info = COALESCE($4, meeting_info),
-           contact_email = COALESCE($5, contact_email),
-           updated_at = NOW()
-       WHERE id = $6
-       RETURNING *`,
-      [name, category, description, meeting_info, contact_email, id],
-    );
-
-    res.json({ message: "Club updated successfully", club: result.rows[0] });
-  } catch (error) {
-    console.error("Error updating club:", error);
-    res.status(500).json({ error: "Failed to update club" });
   }
 };
