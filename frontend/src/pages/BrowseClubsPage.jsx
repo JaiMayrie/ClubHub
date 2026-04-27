@@ -26,6 +26,7 @@ function BrowseClubsPage() {
 
   const fetchClubs = useCallback(async () => {
     setLoading(true);
+
     try {
       const params = {};
       if (search) params.search = search;
@@ -60,7 +61,6 @@ function BrowseClubsPage() {
             Search & Filter
           </h3>
 
-          {/* ✅ FIXED INPUT */}
           <label htmlFor="search" className="sr-only">
             Search clubs
           </label>
@@ -75,7 +75,12 @@ function BrowseClubsPage() {
             className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg mb-4 focus:border-purdue-gold focus:outline-none"
           />
 
+          <label htmlFor="category" className="sr-only">
+            Filter by category
+          </label>
           <select
+            id="category"
+            name="category"
             value={category || "All Categories"}
             onChange={(e) =>
               setCategory(
@@ -93,10 +98,9 @@ function BrowseClubsPage() {
           </select>
         </div>
 
-        {/* Layout */}
+        {/* Two-column layout: club grid + AI sidebar */}
         <div className="flex flex-col lg:flex-row gap-8 items-start">
-
-          {/* Clubs */}
+          {/* Left: club grid */}
           <div className="flex-1 min-w-0">
             <div className="mb-4">
               <h2 className="text-sm font-semibold text-gray-600 uppercase">
@@ -124,33 +128,48 @@ function BrowseClubsPage() {
                       key={club.id}
                       className="overflow-hidden bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300"
                     >
-                      <div className="relative h-44">
-                        <img
-                          src={visual.image}
-                          alt={`${club.name} cover`}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.style.display = "none";
-                          }}
-                        />
+                      <div className="relative h-44 overflow-hidden">
+                        {visual.image ? (
+                          <img
+                            src={visual.image}
+                            alt={`${club.name} cover`}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-purdue-black via-gray-900 to-purdue-gold flex items-center justify-center">
+                            <span className="text-white font-bold text-xl text-center px-5 drop-shadow-lg">
+                              {club.name}
+                            </span>
+                          </div>
+                        )}
+
                         <div
-                          className={`absolute inset-0 bg-gradient-to-t ${visual.accent} opacity-70`}
+                          className={`absolute inset-0 bg-gradient-to-t ${visual.accent} opacity-50`}
+                          aria-hidden="true"
                         />
+
                         <div className="absolute bottom-4 left-4 right-4 text-white">
                           <span className="inline-block bg-white/20 backdrop-blur px-3 py-1 rounded-full text-xs font-semibold mb-2">
                             {club.category}
                           </span>
-                          <h3 className="text-xl font-bold leading-tight">
+
+                          <h3 className="text-xl font-bold leading-tight drop-shadow">
                             {club.name}
                           </h3>
                         </div>
                       </div>
 
                       <div className="p-5">
-                        <div className="flex items-center justify-between text-sm text-gray-600 mb-3">
+                        <div className="flex items-center justify-between text-sm text-gray-600 mb-3 gap-3">
                           <span>{club.member_count} members</span>
+
                           {club.admin_name && (
-                            <span>Led by {club.admin_name}</span>
+                            <span className="truncate">
+                              Led by {club.admin_name}
+                            </span>
                           )}
                         </div>
 
@@ -172,7 +191,7 @@ function BrowseClubsPage() {
             )}
           </div>
 
-          {/* AI Sidebar */}
+          {/* Right: AI sidebar — only for logged-in users */}
           {user && (
             <aside className="w-full lg:w-72 flex-shrink-0">
               <div className="sticky top-4 bg-white border-2 border-gray-200 rounded-lg p-5">
@@ -180,7 +199,6 @@ function BrowseClubsPage() {
               </div>
             </aside>
           )}
-
         </div>
       </main>
     </div>

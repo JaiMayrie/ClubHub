@@ -1,40 +1,65 @@
-export const clubVisuals = {
-  default: {
-    image:
-      "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80",
-    accent: "from-gray-700 to-gray-900",
-  },
-  Academic: {
-    image:
-      "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80",
-    accent: "from-blue-700 to-indigo-900",
-  },
-  Sports: {
-    image:
-      "https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=1200&q=80",
-    accent: "from-green-600 to-emerald-900",
-  },
-  Arts: {
-    image:
-      "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=1200&q=80",
-    accent: "from-pink-600 to-rose-900",
-  },
-  Service: {
-    image:
-      "https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=1200&q=80",
-    accent: "from-amber-500 to-orange-800",
-  },
-  Professional: {
-    image:
-      "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80",
-    accent: "from-slate-700 to-slate-900",
-  },
-  "Special Interest": {
-    image:
-      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
-    accent: "from-purple-700 to-fuchsia-900",
-  },
+// Specific images for named clubs (you can expand this anytime)
+const clubImages = {
+  "Association for Computing Machinery":
+    "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=900&q=80",
+
+  "Basketball Club":
+    "https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=900&q=80",
+
+  "Black Student Union":
+    "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=900&q=80",
+
+  "Photography Club":
+    "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=900&q=80",
+
+  "Chess Club":
+    "https://images.unsplash.com/photo-1529699211952-734e80c4d42b?auto=format&fit=crop&w=900&q=80",
 };
 
-export const getClubVisual = (club) =>
-  clubVisuals[club.category] || clubVisuals.default;
+// Large pool of fallback images (prevents duplicates)
+const fallbackImages = [
+  "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1529699211952-734e80c4d42b?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1492724441997-5dc865305da7?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=900&q=80",
+];
+
+// Accent gradients (for overlay vibe)
+const accents = [
+  "from-black",
+  "from-blue-900",
+  "from-purple-900",
+  "from-green-900",
+  "from-red-900",
+  "from-yellow-900",
+];
+
+// Helper to generate consistent "random" index per club
+function hashString(str = "") {
+  return str
+    .split("")
+    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+}
+
+// MAIN FUNCTION
+export function getClubVisual(club) {
+  const image =
+    clubImages[club.name] ||
+    fallbackImages[hashString(club.name) % fallbackImages.length];
+
+  const accent =
+    accents[hashString(club.name) % accents.length];
+
+  return {
+    image,
+    accent,
+  };
+}
