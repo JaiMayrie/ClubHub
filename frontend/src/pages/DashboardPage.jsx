@@ -8,7 +8,6 @@ import {
   joinRequestsAPI,
   eventsAPI,
 } from "../services/api";
-import AIRecommendations from "../components/AIRecommendations";
 
 function DashboardPage() {
   const { user } = useAuth();
