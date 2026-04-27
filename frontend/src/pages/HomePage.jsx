@@ -166,7 +166,7 @@ function HomePage() {
       <footer className="bg-purdue-black text-white py-8 mt-16">
         <div className="container mx-auto px-4 text-center">
           <p className="text-gray-400">
-            © 2024 ClubHub - Purdue University Fort Wayne
+            © 2026 ClubHub - Purdue University Fort Wayne 
           </p>
         </div>
       </footer>
