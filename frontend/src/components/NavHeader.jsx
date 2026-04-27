@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import UserAvatar from "./UserAvatar";
 
-function NavHeader({ backTo, backLabel = "← Back to Home" }) {
+function NavHeader({ backTo, backLabel = "← Back to Home", backState }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -27,6 +27,7 @@ function NavHeader({ backTo, backLabel = "← Back to Home" }) {
         {backTo ? (
           <Link
             to={backTo}
+            state={backState}
             className="text-white hover:text-purdue-gold transition-colors"
           >
             {backLabel}

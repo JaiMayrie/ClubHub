@@ -269,6 +269,7 @@ function AdminClubCard({ club }) {
       <div className="flex gap-3 mb-6">
         <Link
           to={`/clubs/${club.id}`}
+          state={{ from: "/dashboard" }}
           className="bg-purdue-gold text-black px-4 py-2 rounded font-semibold hover:bg-purdue-gold-dark transition-colors"
         >
           View Club
@@ -281,6 +282,7 @@ function AdminClubCard({ club }) {
         </Link>
         <Link
           to={`/clubs/${club.id}/members`}
+          state={{ from: "/dashboard" }}
           className="bg-gray-200 text-black px-4 py-2 rounded font-semibold hover:bg-gray-300 transition-colors"
         >
           Members
@@ -456,6 +458,7 @@ function StudentClubCard({ membership, onLeave }) {
         <div className="flex flex-col gap-2 items-end">
           <Link
             to={`/clubs/${membership.club_id}`}
+            state={{ from: "/dashboard" }}
             className="bg-purdue-gold text-black px-4 py-2 rounded font-semibold hover:bg-purdue-gold-dark transition-colors text-sm"
           >
             View Club
