@@ -4,7 +4,6 @@ import NavHeader from "../components/NavHeader";
 import { clubsAPI } from "../services/api";
 import { ClubCardSkeleton } from "../components/LoadingSkeleton";
 import { getClubVisual } from "../data/clubVisuals";
-import AIRecommendations from "../components/AIRecommendations";
 import { useAuth } from "../hooks/useAuth";
 
 function BrowseClubsPage() {
@@ -191,15 +190,6 @@ function BrowseClubsPage() {
               </div>
             )}
           </div>
-
-          {/* Right: AI sidebar — only for logged-in users */}
-          {user && (
-            <aside className="w-full lg:w-72 flex-shrink-0">
-              <div className="sticky top-4 bg-white border-2 border-gray-200 rounded-lg p-5">
-                <AIRecommendations user={user} compact={true} />
-              </div>
-            </aside>
-          )}
         </div>
       </main>
     </div>

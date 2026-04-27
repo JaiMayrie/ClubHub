@@ -288,3 +288,28 @@ and separately:
 cd frontend
 npm install
 npm run dev
+
+### Always ensure these environment files are configured for the frontend and backend:
+
+Backend .env:
+
+# Environment Configuration
+NODE_ENV=development
+PORT=5000
+JWT_SECRET=ZcOx3bZ3CAK2w0h5wuJtya4yPhMTSZpML+szmE+IdN4=
+FRONTEND_URL=http://localhost:5173
+
+# Email notification system email
+EMAIL_FROM=clubhub.notifications@gmail.com
+EMAIL_APP_PASSWORD=wdegwqkdhbjkhddc
+
+# Database Configuration
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=clubhub
+DB_USER=postgres
+DB_PASSWORD=postgres
+
+Frontend .env:
+# API Configuration
+VITE_API_URL=http://localhost:5000/api

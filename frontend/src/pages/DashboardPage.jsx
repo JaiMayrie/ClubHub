@@ -109,11 +109,6 @@ function DashboardPage() {
           // STUDENT VIEW
           <>
             {/* Memberships */}
-            <section className="mb-8">
-              <div className="bg-white border-2 border-gray-200 rounded-lg p-6">
-                <AIRecommendations user={user} compact={false} />
-              </div>
-            </section>
             <section className="mb-12">
               <div className="bg-white border-2 border-gray-200 rounded-lg p-6">
                 <h2 className="text-xl font-bold text-gray-600 uppercase mb-6">
