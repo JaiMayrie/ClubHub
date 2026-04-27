@@ -14,6 +14,11 @@ router.post("/", authenticate, clubController.createClub);
 router.get("/:id", clubController.getClubById);
 router.patch("/:id", authenticate, clubController.updateClub);
 router.get("/:id/members", authenticate, memberController.getClubMembers);
+router.delete(
+  "/:id/members/:userId",
+  authenticate,
+  memberController.removeClubMember,
+);
 router.get(
   "/:id/join-requests",
   authenticate,

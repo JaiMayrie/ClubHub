@@ -108,12 +108,14 @@ function ClubMembersPage() {
                     </td>
                     {data?.is_admin && (
                       <td className="px-6 py-4 text-right">
-                        <button
-                          onClick={() => handleRemove(member.id, member.name)}
-                          className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors"
-                        >
-                          Remove
-                        </button>
+                        {member.id !== data.admin_id && (
+                          <button
+                            onClick={() => handleRemove(member.id, member.name)}
+                            className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors"
+                          >
+                            Remove
+                          </button>
+                        )}
                       </td>
                     )}
                   </tr>
