@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001/api";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 export const getAvatarUrl = (avatarUrl) => {
   if (!avatarUrl) return null;
@@ -20,7 +20,7 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 // Auto logout on 401
@@ -35,7 +35,7 @@ api.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 // ==========================
@@ -172,9 +172,7 @@ export const membersAPI = {
   },
 
   removeMember: async (clubId, userId) => {
-    const response = await api.delete(
-      `/clubs/${clubId}/members/${userId}`
-    );
+    const response = await api.delete(`/clubs/${clubId}/members/${userId}`);
     return response.data;
   },
 };

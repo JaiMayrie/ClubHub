@@ -50,12 +50,6 @@ router.post(
   uploadAvatar.single("avatar"),
   authController.uploadAvatar,
 );
-router.post(
-  "/avatar",
-  authenticate,
-  uploadAvatar.single("avatar"),
-  authController.uploadAvatar,
-);
 
 // Public profile — view any user's profile (authenticated)
 router.get("/users/:id", authenticate, authController.getPublicProfile);

@@ -8,15 +8,13 @@
 // =============================================================
 
 // When running locally, DB_HOST must be 'localhost' (not the Docker-internal 'db' hostname).
-// dotenv won't overwrite a variable that's already set, so we set the default here.
-// Override by passing DB_HOST in your shell: DB_HOST=myserver npm run db:seed
+require("dotenv").config();
 if (!process.env.DB_HOST) {
   process.env.DB_HOST = "localhost";
 }
 if (!process.env.DB_PORT) {
   process.env.DB_PORT = "5432";
 }
-require("dotenv").config();
 const fs = require("fs");
 const path = require("path");
 const db = require("../../db");

@@ -1,27 +1,28 @@
 const express = require("express");
 const router = express.Router();
 const clubController = require("../controllers/clubController");
-const { authenticate } = require("../middleware/authMiddleware");
+const joinRequestController = require("../controllers/joinRequestController");
 const memberController = require("../controllers/memberController");
+const { authenticate } = require("../middleware/authMiddleware");
 
 // Public routes
 router.get("/", clubController.getAllClubs);
 
-// Protected specific routes (MUST be BEFORE /:id or they get swallowed)
+// Protected routes
 router.get("/my-clubs", authenticate, clubController.getMyClubs);
-
-// Dynamic route (AFTER specific routes)
-router.get("/:id", clubController.getClubById);
-
-// Join requests for a club (admin only)
-router.get("/:id/join-requests", authenticate, clubController.getClubJoinRequests);
-
-// Members
-router.get("/:id/members", authenticate, memberController.getClubMembers);
-router.delete("/:id/members/:userId", authenticate, memberController.removeClubMember);
-
-// Create / update club (admin only)
 router.post("/", authenticate, clubController.createClub);
+router.get("/:id", clubController.getClubById);
 router.patch("/:id", authenticate, clubController.updateClub);
+router.get("/:id/members", authenticate, memberController.getClubMembers);
+router.delete(
+  "/:id/members/:userId",
+  authenticate,
+  memberController.removeClubMember,
+);
+router.get(
+  "/:id/join-requests",
+  authenticate,
+  joinRequestController.getClubJoinRequests,
+);
 
 module.exports = router;
