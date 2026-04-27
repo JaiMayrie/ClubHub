@@ -152,9 +152,12 @@ function ClubDetailPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600 mb-4">Club not found</p>
-          <Link to="/clubs" className="text-purdue-gold hover:underline">
-            ← Back to clubs
-          </Link>
+          <button
+            onClick={() => navigate(-1)}
+            className="text-purdue-gold hover:underline"
+          >
+            ← Back
+          </button>
         </div>
       </div>
     );
@@ -169,9 +172,12 @@ function ClubDetailPage() {
 
       <main className="container mx-auto px-4 py-8">
         <div className="mb-6">
-          <Link to="/clubs" className="text-purdue-gold hover:underline">
-            ← Back to all clubs
-          </Link>
+          <button
+            onClick={() => navigate(-1)}
+            className="text-purdue-gold hover:underline"
+          >
+            ← Back
+          </button>
         </div>
 
         <div className="overflow-hidden bg-white border-2 border-gray-200 rounded-2xl">
