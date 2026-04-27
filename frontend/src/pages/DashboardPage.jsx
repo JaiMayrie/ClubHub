@@ -311,7 +311,7 @@ function AdminClubCard({ club }) {
 function AdminEventsTab({ clubs }) {
   const [formData, setFormData] = useState({
     club_id: "",
-    title: "",
+    name: "",
     description: "",
     location: "",
     event_date: "",
@@ -370,10 +370,10 @@ function AdminEventsTab({ clubs }) {
         </select>
 
         <input
-          id="title"
-          name="title"
+          id="name"
+          name="name"      
           placeholder="Event name"
-          value={formData.title}
+          value={formData.name}
           onChange={handleChange}
           required
           className="border px-3 py-2 rounded"
