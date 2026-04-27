@@ -1,32 +1,14 @@
 const db = require("../db");
 
-/**
- * Get All Clubs
- */
+// ================= GET ALL CLUBS =================
 exports.getAllClubs = async (req, res) => {
   try {
-    const { search, category } = req.query;
-    const conditions = [];
-    const params = [];
+    const { category, search } = req.query;
+    const sanitizedCategory = category?.trim();
+    const sanitizedSearch = search?.trim();
 
-    if (search) {
-      params.push(`%${search}%`);
-      conditions.push(
-        `(clubs.name ILIKE $${params.length} OR clubs.description ILIKE $${params.length})`,
-      );
-    }
-
-    if (category) {
-      params.push(category);
-      conditions.push(`clubs.category = $${params.length}`);
-    }
-
-    const whereClause = conditions.length
-      ? `WHERE ${conditions.join(" AND ")}`
-      : "";
-
-    const result = await db.query(
-      `SELECT 
+    let query = `
+      SELECT 
         clubs.id,
         clubs.name,
         clubs.category,
@@ -41,11 +23,33 @@ exports.getAllClubs = async (req, res) => {
       FROM clubs
       LEFT JOIN users ON clubs.admin_id = users.id
       LEFT JOIN memberships ON memberships.club_id = clubs.id
-      ${whereClause}
-      GROUP BY clubs.id, users.name
-      ORDER BY clubs.name ASC`,
-      params,
-    );
+    `;
+
+    const values = [];
+    const conditions = [];
+    let paramCount = 1;
+
+    if (sanitizedCategory) {
+      conditions.push(`clubs.category = $${paramCount}`);
+      values.push(sanitizedCategory);
+      paramCount++;
+    }
+
+    if (sanitizedSearch) {
+      conditions.push(
+        `(clubs.name ILIKE $${paramCount} OR clubs.description ILIKE $${paramCount})`,
+      );
+      values.push(`%${sanitizedSearch}%`);
+      paramCount++;
+    }
+
+    if (conditions.length > 0) {
+      query += " WHERE " + conditions.join(" AND ");
+    }
+
+    query += " GROUP BY clubs.id, users.name ORDER BY clubs.name ASC";
+
+    const result = await db.query(query, values);
 
     return res.json({
       clubs: result.rows,
@@ -53,7 +57,6 @@ exports.getAllClubs = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Error fetching clubs:", error);
-
     return res.status(500).json({
       error: "Failed to fetch clubs",
       message: error.message,
@@ -61,9 +64,7 @@ exports.getAllClubs = async (req, res) => {
   }
 };
 
-/**
- * Get Club By ID
- */
+// ================= GET CLUB BY ID =================
 exports.getClubById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -73,8 +74,7 @@ exports.getClubById = async (req, res) => {
     }
 
     const result = await db.query(
-      `
-      SELECT 
+      `SELECT 
         clubs.id,
         clubs.name,
         clubs.category,
@@ -85,12 +85,11 @@ exports.getClubById = async (req, res) => {
         clubs.created_at,
         clubs.updated_at,
         (SELECT COUNT(*) FROM memberships WHERE memberships.club_id = clubs.id) AS member_count,
-        users.name as admin_name,
-        users.email as admin_email
+        users.name AS admin_name,
+        users.email AS admin_email
       FROM clubs
       LEFT JOIN users ON clubs.admin_id = users.id
-      WHERE clubs.id = $1
-    `,
+      WHERE clubs.id = $1`,
       [id],
     );
 
@@ -101,7 +100,6 @@ exports.getClubById = async (req, res) => {
     return res.json({ club: result.rows[0] });
   } catch (error) {
     console.error("❌ Error fetching club:", error);
-
     return res.status(500).json({
       error: "Failed to fetch club",
       message: error.message,
@@ -109,23 +107,45 @@ exports.getClubById = async (req, res) => {
   }
 };
 
-/**
- * Create Club
- */
+// ================= GET MY CLUBS =================
+exports.getMyClubs = async (req, res) => {
+  try {
+    const result = await db.query(
+      `SELECT 
+        id, name, category, description, meeting_info, contact_email,
+        created_at, updated_at,
+        (SELECT COUNT(*) FROM memberships WHERE memberships.club_id = clubs.id) AS member_count
+       FROM clubs
+       WHERE admin_id = $1
+       ORDER BY created_at DESC`,
+      [req.userId],
+    );
+
+    return res.json({
+      clubs: result.rows,
+      count: result.rows.length,
+    });
+  } catch (error) {
+    console.error("❌ Error fetching user clubs:", error);
+    return res.status(500).json({ error: "Failed to fetch clubs" });
+  }
+};
+
+// ================= CREATE CLUB =================
 exports.createClub = async (req, res) => {
   try {
     const { name, category, description, meeting_info, contact_email } =
       req.body;
 
     if (!name || !category || !description) {
-      return res
-        .status(400)
-        .json({ error: "Name, category, and description are required" });
+      return res.status(400).json({
+        error: "Name, category, and description are required",
+      });
     }
 
-    if (name.length < 3 || name.length > 150) {
+    if (name.trim().length < 3 || name.trim().length > 150) {
       return res.status(400).json({
-        error: `Club name must be between 3 and 150 characters (got ${name.length})`,
+        error: "Club name must be between 3 and 150 characters",
       });
     }
 
@@ -160,50 +180,35 @@ exports.createClub = async (req, res) => {
       `INSERT INTO clubs (name, category, description, meeting_info, contact_email, admin_id)
        VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
-      [name, category, description, meeting_info, contact_email, req.userId],
+      [
+        name.trim(),
+        category,
+        description,
+        meeting_info || null,
+        contact_email || null,
+        req.userId,
+      ],
     );
 
     const club = result.rows[0];
 
+    // Add admin as a member of their own club
     await db.query(
-      "INSERT INTO memberships (user_id, club_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+      "INSERT INTO memberships (user_id, club_id) VALUES ($1, $2)",
       [req.userId, club.id],
     );
 
-    return res.status(201).json({ message: "Club created successfully", club });
+    return res.status(201).json({
+      message: "Club created successfully",
+      club,
+    });
   } catch (error) {
     console.error("❌ Error creating club:", error);
-    return res
-      .status(500)
-      .json({ error: "Failed to create club", message: error.message });
+    return res.status(500).json({ error: "Failed to create club" });
   }
 };
 
-/**
- * Get clubs managed by current user
- */
-exports.getMyClubs = async (req, res) => {
-  try {
-    const result = await db.query(
-      `SELECT 
-        id, name, category, description, created_at, updated_at,
-        (SELECT COUNT(*) FROM memberships WHERE memberships.club_id = clubs.id) AS member_count
-       FROM clubs
-       WHERE admin_id = $1
-       ORDER BY created_at DESC`,
-      [req.userId],
-    );
-
-    return res.json({ clubs: result.rows, count: result.rows.length });
-  } catch (error) {
-    console.error("❌ Error fetching user clubs:", error);
-    return res.status(500).json({ error: "Failed to fetch clubs" });
-  }
-};
-
-/**
- * Update Club
- */
+// ================= UPDATE CLUB =================
 exports.updateClub = async (req, res) => {
   try {
     const { id } = req.params;
@@ -215,9 +220,11 @@ exports.updateClub = async (req, res) => {
       "SELECT admin_id FROM clubs WHERE id = $1",
       [id],
     );
+
     if (clubCheck.rows.length === 0) {
       return res.status(404).json({ error: "Club not found" });
     }
+
     if (clubCheck.rows[0].admin_id !== userId) {
       return res
         .status(403)
@@ -247,15 +254,22 @@ exports.updateClub = async (req, res) => {
 
     const result = await db.query(
       `UPDATE clubs
-       SET name = COALESCE($1, name),
-           category = COALESCE($2, category),
-           description = COALESCE($3, description),
+       SET name         = COALESCE($1, name),
+           category     = COALESCE($2, category),
+           description  = COALESCE($3, description),
            meeting_info = COALESCE($4, meeting_info),
            contact_email = COALESCE($5, contact_email),
-           updated_at = NOW()
+           updated_at   = NOW()
        WHERE id = $6
        RETURNING *`,
-      [name, category, description, meeting_info, contact_email, id],
+      [
+        name || null,
+        category || null,
+        description || null,
+        meeting_info || null,
+        contact_email || null,
+        id,
+      ],
     );
 
     return res.json({
@@ -265,5 +279,48 @@ exports.updateClub = async (req, res) => {
   } catch (error) {
     console.error("❌ Error updating club:", error);
     return res.status(500).json({ error: "Failed to update club" });
+  }
+};
+
+// ================= GET CLUB JOIN REQUESTS =================
+exports.getClubJoinRequests = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+
+    const clubCheck = await db.query(
+      "SELECT admin_id FROM clubs WHERE id = $1",
+      [id],
+    );
+
+    if (clubCheck.rows.length === 0) {
+      return res.status(404).json({ error: "Club not found" });
+    }
+
+    if (clubCheck.rows[0].admin_id !== userId) {
+      return res.status(403).json({
+        error: "You are not authorized to view requests for this club",
+      });
+    }
+
+    const result = await db.query(
+      `SELECT 
+        join_requests.*,
+        users.name AS user_name,
+        users.email AS user_email
+       FROM join_requests
+       JOIN users ON join_requests.user_id = users.id
+       WHERE join_requests.club_id = $1 AND join_requests.status = 'pending'
+       ORDER BY join_requests.created_at DESC`,
+      [id],
+    );
+
+    return res.json({
+      requests: result.rows,
+      count: result.rows.length,
+    });
+  } catch (error) {
+    console.error("❌ Error fetching join requests:", error);
+    return res.status(500).json({ error: "Failed to fetch join requests" });
   }
 };
