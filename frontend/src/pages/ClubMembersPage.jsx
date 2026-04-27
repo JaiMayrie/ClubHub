@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import NavHeader from "../components/NavHeader";
 import { membersAPI } from "../services/api";
 
 function ClubMembersPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -53,7 +54,11 @@ function ClubMembersPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <NavHeader backTo={`/clubs/${id}`} backLabel="← Back to Club" />
+      <NavHeader
+        backTo={`/clubs/${id}`}
+        backLabel="← Back to Club"
+        backState={{ from: location.state?.from }}
+      />
       <main className="container mx-auto px-4 py-8 max-w-3xl">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">{data?.club_name}</h1>
@@ -108,12 +113,14 @@ function ClubMembersPage() {
                     </td>
                     {data?.is_admin && (
                       <td className="px-6 py-4 text-right">
-                        <button
-                          onClick={() => handleRemove(member.id, member.name)}
-                          className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors"
-                        >
-                          Remove
-                        </button>
+                        {member.id !== data.admin_id && (
+                          <button
+                            onClick={() => handleRemove(member.id, member.name)}
+                            className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors"
+                          >
+                            Remove
+                          </button>
+                        )}
                       </td>
                     )}
                   </tr>

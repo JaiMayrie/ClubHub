@@ -2,7 +2,12 @@ import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import NavHeader from "../components/NavHeader";
-import { clubsAPI, membershipsAPI, joinRequestsAPI, eventsAPI  } from "../services/api";
+import {
+  clubsAPI,
+  membershipsAPI,
+  joinRequestsAPI,
+  eventsAPI,
+} from "../services/api";
 import AIRecommendations from "../components/AIRecommendations";
 
 function DashboardPage() {
@@ -264,6 +269,7 @@ function AdminClubCard({ club }) {
       <div className="flex gap-3 mb-6">
         <Link
           to={`/clubs/${club.id}`}
+          state={{ from: "/dashboard" }}
           className="bg-purdue-gold text-black px-4 py-2 rounded font-semibold hover:bg-purdue-gold-dark transition-colors"
         >
           View Club
@@ -276,6 +282,7 @@ function AdminClubCard({ club }) {
         </Link>
         <Link
           to={`/clubs/${club.id}/members`}
+          state={{ from: "/dashboard" }}
           className="bg-gray-200 text-black px-4 py-2 rounded font-semibold hover:bg-gray-300 transition-colors"
         >
           Members
@@ -335,7 +342,7 @@ function AdminEventsTab({ clubs }) {
 
       setFormData({
         club_id: "",
-        title: "",
+        name: "",
         description: "",
         location: "",
         event_date: "",
@@ -371,7 +378,7 @@ function AdminEventsTab({ clubs }) {
 
         <input
           id="name"
-          name="name"      
+          name="name"
           placeholder="Event name"
           value={formData.name}
           onChange={handleChange}
@@ -451,6 +458,7 @@ function StudentClubCard({ membership, onLeave }) {
         <div className="flex flex-col gap-2 items-end">
           <Link
             to={`/clubs/${membership.club_id}`}
+            state={{ from: "/dashboard" }}
             className="bg-purdue-gold text-black px-4 py-2 rounded font-semibold hover:bg-purdue-gold-dark transition-colors text-sm"
           >
             View Club

@@ -51,6 +51,7 @@ exports.getClubMembers = async (req, res) => {
 
     return res.json({
       club_name: clubCheck.rows[0].name,
+      admin_id: clubCheck.rows[0].admin_id,
       member_count: result.rows.length,
       members: result.rows,
       is_admin: isAdmin,

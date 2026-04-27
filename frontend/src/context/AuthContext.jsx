@@ -3,7 +3,7 @@ import { AuthContext } from "./auth-context";
 
 const TOKEN_KEY = "clubhub_token";
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5001/api";
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => localStorage.getItem(TOKEN_KEY));
@@ -124,7 +124,7 @@ export function AuthProvider({ children }) {
       if (!response.ok) {
         throw new Error(data.error ?? "Registration failed");
       }
-      
+
       console.log("✅ Registration successful — redirecting to login");
       // Do NOT store token or log the user in automatically
       return data;

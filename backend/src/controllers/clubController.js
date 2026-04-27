@@ -37,7 +37,7 @@ exports.getAllClubs = async (req, res) => {
 
     if (sanitizedSearch) {
       conditions.push(
-        `(clubs.name ILIKE $${paramCount} OR clubs.description ILIKE $${paramCount})`
+        `(clubs.name ILIKE $${paramCount} OR clubs.description ILIKE $${paramCount})`,
       );
       values.push(`%${sanitizedSearch}%`);
       paramCount++;
@@ -90,7 +90,7 @@ exports.getClubById = async (req, res) => {
       FROM clubs
       LEFT JOIN users ON clubs.admin_id = users.id
       WHERE clubs.id = $1`,
-      [id]
+      [id],
     );
 
     if (result.rows.length === 0) {
@@ -118,7 +118,7 @@ exports.getMyClubs = async (req, res) => {
        FROM clubs
        WHERE admin_id = $1
        ORDER BY created_at DESC`,
-      [req.userId]
+      [req.userId],
     );
 
     return res.json({
@@ -134,7 +134,8 @@ exports.getMyClubs = async (req, res) => {
 // ================= CREATE CLUB =================
 exports.createClub = async (req, res) => {
   try {
-    const { name, category, description, meeting_info, contact_email } = req.body;
+    const { name, category, description, meeting_info, contact_email } =
+      req.body;
 
     if (!name || !category || !description) {
       return res.status(400).json({
@@ -148,7 +149,14 @@ exports.createClub = async (req, res) => {
       });
     }
 
-    const validCategories = ["Academic", "Sports", "Arts", "Service", "Professional", "Special Interest"];
+    const validCategories = [
+      "Academic",
+      "Sports",
+      "Arts",
+      "Service",
+      "Professional",
+      "Special Interest",
+    ];
     if (!validCategories.includes(category)) {
       return res.status(400).json({
         error: `Invalid category. Must be one of: ${validCategories.join(", ")}`,
@@ -163,14 +171,23 @@ exports.createClub = async (req, res) => {
     }
 
     if (req.userRole !== "admin") {
-      return res.status(403).json({ error: "Only administrators can create clubs" });
+      return res
+        .status(403)
+        .json({ error: "Only administrators can create clubs" });
     }
 
     const result = await db.query(
       `INSERT INTO clubs (name, category, description, meeting_info, contact_email, admin_id)
        VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
-      [name.trim(), category, description, meeting_info || null, contact_email || null, req.userId]
+      [
+        name.trim(),
+        category,
+        description,
+        meeting_info || null,
+        contact_email || null,
+        req.userId,
+      ],
     );
 
     const club = result.rows[0];
@@ -178,7 +195,7 @@ exports.createClub = async (req, res) => {
     // Add admin as a member of their own club
     await db.query(
       "INSERT INTO memberships (user_id, club_id) VALUES ($1, $2)",
-      [req.userId, club.id]
+      [req.userId, club.id],
     );
 
     return res.status(201).json({
@@ -195,12 +212,13 @@ exports.createClub = async (req, res) => {
 exports.updateClub = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, category, description, meeting_info, contact_email } = req.body;
+    const { name, category, description, meeting_info, contact_email } =
+      req.body;
     const userId = req.userId;
 
     const clubCheck = await db.query(
       "SELECT admin_id FROM clubs WHERE id = $1",
-      [id]
+      [id],
     );
 
     if (clubCheck.rows.length === 0) {
@@ -208,10 +226,19 @@ exports.updateClub = async (req, res) => {
     }
 
     if (clubCheck.rows[0].admin_id !== userId) {
-      return res.status(403).json({ error: "Only the club admin can edit this club" });
+      return res
+        .status(403)
+        .json({ error: "Only the club admin can edit this club" });
     }
 
-    const validCategories = ["Academic", "Sports", "Arts", "Service", "Professional", "Special Interest"];
+    const validCategories = [
+      "Academic",
+      "Sports",
+      "Arts",
+      "Service",
+      "Professional",
+      "Special Interest",
+    ];
     if (category && !validCategories.includes(category)) {
       return res.status(400).json({
         error: `Invalid category. Must be one of: ${validCategories.join(", ")}`,
@@ -235,7 +262,14 @@ exports.updateClub = async (req, res) => {
            updated_at   = NOW()
        WHERE id = $6
        RETURNING *`,
-      [name || null, category || null, description || null, meeting_info || null, contact_email || null, id]
+      [
+        name || null,
+        category || null,
+        description || null,
+        meeting_info || null,
+        contact_email || null,
+        id,
+      ],
     );
 
     return res.json({
@@ -256,7 +290,7 @@ exports.getClubJoinRequests = async (req, res) => {
 
     const clubCheck = await db.query(
       "SELECT admin_id FROM clubs WHERE id = $1",
-      [id]
+      [id],
     );
 
     if (clubCheck.rows.length === 0) {
@@ -278,7 +312,7 @@ exports.getClubJoinRequests = async (req, res) => {
        JOIN users ON join_requests.user_id = users.id
        WHERE join_requests.club_id = $1 AND join_requests.status = 'pending'
        ORDER BY join_requests.created_at DESC`,
-      [id]
+      [id],
     );
 
     return res.json({

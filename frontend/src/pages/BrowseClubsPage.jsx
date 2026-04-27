@@ -84,7 +84,7 @@ function BrowseClubsPage() {
             value={category || "All Categories"}
             onChange={(e) =>
               setCategory(
-                e.target.value === "All Categories" ? "" : e.target.value
+                e.target.value === "All Categories" ? "" : e.target.value,
               )
             }
             aria-label="Filter by category"
@@ -179,6 +179,7 @@ function BrowseClubsPage() {
 
                         <Link
                           to={`/clubs/${club.id}`}
+                          state={{ from: "/clubs" }}
                           className="block w-full text-center bg-purdue-gold text-black py-2.5 rounded-lg font-semibold hover:bg-purdue-gold-dark transition-colors"
                         >
                           View Club
