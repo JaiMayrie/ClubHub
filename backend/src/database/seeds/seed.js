@@ -13,7 +13,7 @@ if (!process.env.DB_HOST) {
   process.env.DB_HOST = "localhost";
 }
 if (!process.env.DB_PORT) {
-  process.env.DB_PORT = "5433";
+  process.env.DB_PORT = "5432";
 }
 const fs = require("fs");
 const path = require("path");

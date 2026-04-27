@@ -10,11 +10,13 @@
 // They will be forced to change it on first login.
 // =============================================================
 
+require("dotenv").config();
 if (!process.env.DB_HOST) {
   process.env.DB_HOST = "localhost";
-  process.env.DB_PORT = "5433";
 }
-require("dotenv").config();
+if (!process.env.DB_PORT) {
+  process.env.DB_PORT = "5432";
+}
 
 const bcrypt = require("bcrypt");
 const db = require("../../db");
@@ -70,10 +72,9 @@ async function seedAdmins() {
     const normalizedEmail = admin.email.toLowerCase();
 
     // Check if user already exists
-    const existing = await db.query(
-      "SELECT id FROM users WHERE email = $1",
-      [normalizedEmail]
-    );
+    const existing = await db.query("SELECT id FROM users WHERE email = $1", [
+      normalizedEmail,
+    ]);
 
     if (existing.rows.length > 0) {
       // Update existing user — promote to admin, set temp password
@@ -85,7 +86,7 @@ async function seedAdmins() {
              name                = $2,
              bio                 = $3
          WHERE email = $4`,
-        [passwordHash, admin.name, admin.bio, normalizedEmail]
+        [passwordHash, admin.name, admin.bio, normalizedEmail],
       );
       console.log(`  ✅ Updated → admin: ${normalizedEmail} (${admin.note})`);
     } else {
@@ -94,7 +95,7 @@ async function seedAdmins() {
         `INSERT INTO users
            (name, email, password_hash, role, bio, major, year, must_change_password)
          VALUES ($1, $2, $3, 'admin', $4, '', '', TRUE)`,
-        [admin.name, normalizedEmail, passwordHash, admin.bio]
+        [admin.name, normalizedEmail, passwordHash, admin.bio],
       );
       console.log(`  ✅ Created admin: ${normalizedEmail} (${admin.note})`);
     }
