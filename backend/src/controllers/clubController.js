@@ -5,8 +5,28 @@ const db = require("../db");
  */
 exports.getAllClubs = async (req, res) => {
   try {
-    const result = await db.query(`
-      SELECT 
+    const { search, category } = req.query;
+    const conditions = [];
+    const params = [];
+
+    if (search) {
+      params.push(`%${search}%`);
+      conditions.push(
+        `(clubs.name ILIKE $${params.length} OR clubs.description ILIKE $${params.length})`,
+      );
+    }
+
+    if (category) {
+      params.push(category);
+      conditions.push(`clubs.category = $${params.length}`);
+    }
+
+    const whereClause = conditions.length
+      ? `WHERE ${conditions.join(" AND ")}`
+      : "";
+
+    const result = await db.query(
+      `SELECT 
         clubs.id,
         clubs.name,
         clubs.category,
@@ -21,9 +41,11 @@ exports.getAllClubs = async (req, res) => {
       FROM clubs
       LEFT JOIN users ON clubs.admin_id = users.id
       LEFT JOIN memberships ON memberships.club_id = clubs.id
+      ${whereClause}
       GROUP BY clubs.id, users.name
-      ORDER BY clubs.name ASC
-    `);
+      ORDER BY clubs.name ASC`,
+      params,
+    );
 
     return res.json({
       clubs: result.rows,
